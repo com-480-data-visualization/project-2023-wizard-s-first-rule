@@ -12,11 +12,6 @@
 
 **10% of the final grade**
 
-This is a preliminary milestone to let you set up goals for your final project and assess the feasibility of your ideas.
-Please, fill the following sections about your project.
-
-*(max. 2000 characters per section)*
-
 ### Dataset
 
 We chose the dataset ["Video Game Sales with Ratings"](https://www.kaggle.com/datasets/rush4ratio/video-game-sales-with-ratings). This Kaggle dataset, contains information about video game sales, ratings, and other relevant details. It aims to provide insights into the video game industry's trends and patterns, as well as the factors that influence a game's success in terms of sales and reception.
