@@ -19,9 +19,27 @@ Please, fill the following sections about your project.
 
 ### Dataset
 
-> Find a dataset (or multiple) that you will explore. Assess the quality of the data it contains and how much preprocessing / data-cleaning it will require before tackling visualization. We recommend using a standard dataset as this course is not about scraping nor data processing.
->
-> Hint: some good pointers for finding quality publicly available datasets ([Google dataset search](https://datasetsearch.research.google.com/), [Kaggle](https://www.kaggle.com/datasets), [OpenSwissData](https://opendata.swiss/en/), [SNAP](https://snap.stanford.edu/data/) and [FiveThirtyEight](https://data.fivethirtyeight.com/)), you could use also the DataSets proposed by the ENAC (see the Announcements section on Zulip).
+We chose the dataset ["Video Game Sales with Ratings"](https://www.kaggle.com/datasets/rush4ratio/video-game-sales-with-ratings). This Kaggle dataset, contains information about video game sales, ratings, and other relevant details. It aims to provide insights into the video game industry's trends and patterns, as well as the factors that influence a game's success in terms of sales and reception.
+
+The dataset consists of several attributes for each video game, including:
+- Name: The title of the video game.
+- Platform: The gaming console or system on which the game is available.
+- Year_of_Release: The year in which the game was released.
+- Genre: The game's genre (e.g., Action, Adventure, Sports, etc.).
+- Publisher: The company that published the game.
+- NA_Sales: Sales in North America (in millions of units).
+- EU_Sales: Sales in Europe (in millions of units).
+- JP_Sales: Sales in Japan (in millions of units).
+- Other_Sales: Sales in other regions (in millions of units).
+- Global_Sales: Total worldwide sales (in millions of units).
+- Critic_Score: Aggregate score compiled from various critic reviews (range: 0-100).
+- Critic_Count: The number of critics who contributed to the critic score.
+- User_Score: Aggregate score compiled from user reviews (range: 0-10).
+- User_Count: The number of users who contributed to the user score.
+- Developer: The company or team responsible for developing the game.
+- Rating: The game's rating according to the Entertainment Software Rating
+
+
 
 ### Problematic
 
