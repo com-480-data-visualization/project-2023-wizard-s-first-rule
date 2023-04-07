@@ -49,8 +49,7 @@ The dataset consists of several attributes for each video game, including:
 
 ### Exploratory Data Analysis
 
-> Pre-processing of the data set you chose
-> - Show some basic statistics and get insights about the data
+We have done some intial analysis of the dataset in a [jupyter notebook file](vg_sales.ipynb), where we looked at basic statistic about the dataset as well as the difference in terms of sales, top games across different regions.
 
 ### Related work
 
