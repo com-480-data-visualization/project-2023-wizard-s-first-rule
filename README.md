@@ -40,12 +40,9 @@ The dataset consists of several attributes for each video game, including:
 - Rating: The game's rating according to the Entertainment Software Rating
 
 
-
 ### Problematic
 
-> Frame the general topic of your visualization and the main axis that you want to develop.
-> - What am I trying to show with my visualization?
-> - Think of an overview for the project, your motivation, and the target audience.
+Our objective with this dataset is to analyze how video games function across different regions. We acknowledge that cultural differences vary across regions and it would be intriguing to observe how these differences impact video games, which are primarily designed for a universal audience. In addition to this, we can also examine the evolution of video games based on the console they are played on.
 
 ### Exploratory Data Analysis
 
