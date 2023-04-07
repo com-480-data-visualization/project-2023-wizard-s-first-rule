@@ -50,11 +50,7 @@ We have done some intial analysis of the dataset in a [jupyter notebook file](vg
 
 ### Related work
 
-
-> - What others have already done with the data?
-> - Why is your approach original?
-> - What source of inspiration do you take? Visualizations that you found on other websites or magazines (might be unrelated to your data).
-> - In case you are using a dataset that you have already explored in another context (ML or ADA course, semester project...), you are required to share the report of that work to outline the differences with the submission for this class.
+We are new to exploring this dataset and have not yet begun any related work. Prior analyses on this dataset have involved static analyses and basic graphs to track sales trends over the years. Our approach aims to be unique in that we will create interactive and visually appealing graphs. For instance, we plan to include a world map where users can click on a specific region to access information on top video games and observe differences in regional preferences through visual representations of these games. Additionally, we are considering extending our analysis to focus on specific franchises in order to gain more detailed insights.
 
 ## Milestone 2 (7th May, 5pm)
 
