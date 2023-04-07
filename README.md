@@ -42,7 +42,7 @@ The dataset consists of several attributes for each video game, including:
 
 ### Problematic
 
-Our objective with this dataset is to analyze how video games function across different regions. We acknowledge that cultural differences vary across regions and it would be intriguing to observe how these differences impact video games, which are primarily designed for a universal audience. In addition to this, we can also examine the evolution of video games based on the console they are played on.
+Our objective with this dataset is to analyze how video games function across different regions. We acknowledge that cultural differences vary across regions and it would be intriguing to observe how these differences impact video games, which are primarily designed for a universal audience. In addition to this, we can also examine the evolution of video games based on the console they are played on. After this analyisis, we could try to create a model that would predict if a game would be success or not.
 
 ### Exploratory Data Analysis
 
