@@ -1,0 +1,15 @@
+name: data_viz
+channels:
+  - defaults
+  - conda-forge
+  - plotly
+dependencies:
+  - python
+  - pip
+  - jupyter
+  - numpy
+  - pandas
+  - matplotlib
+  - seaborn
+  - plotly
+  - d3
