@@ -561,9 +561,10 @@ section {
   margin-bottom: 0;
 }
 
-.graph_map {
+.graph_map .sankey_mokup {
   width:80%;
 }
+
 
 /*--------------------------------------------------------------
 # Clients
