@@ -561,7 +561,11 @@ section {
   margin-bottom: 0;
 }
 
-.graph_map .sankey_mokup {
+.graph_map {
+  width:80%;
+}
+
+.sankey_mokup {
   width:80%;
 }
 
