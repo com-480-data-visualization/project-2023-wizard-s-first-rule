@@ -1,5 +1,7 @@
 loadAndCreateSankey();
 
+const margin = {top: 10, right: 10, bottom: 10, left: 10};
+
 function loadAndCreateSankey(){
     Promise.all([
         d3.json("./datasets/sankey.json"),
@@ -69,9 +71,8 @@ function updateSankey(selectedOption, data, links) {
     // const linkUpdate = links.selectAll("path.link").data(graph.links);
 }
 
-function createSankeyDiagram(data, links) {
+function createSankeyDiagram(data, urls) {
     // Set the dimensions and margins of the diagram
-    const margin = {top: 10, right: 10, bottom: 10, left: 10};
     const width = 800 - margin.left - margin.right;
     const height = 600 - margin.top - margin.bottom;
 
@@ -114,66 +115,8 @@ function createSankeyDiagram(data, links) {
     .join("g");
     // .attr("transform", d => `translate(${d.x0},${d.y0})`)
 
-    const uniqueNames = {
-        platform: new Set(data.nodes.filter(node => node.category === 'platform').map(node => node.name)),
-        region: new Set(data.nodes.filter(node => node.category === 'region').map(node => node.name)),
-        genre: new Set(data.nodes.filter(node => node.category === 'genre').map(node => node.name)),
-    };
-
-    const platformColors = [];
-    const nb_platform = uniqueNames['platform'].size;
-    const regionColors = [];
-    const nb_region = uniqueNames['region'].size;
-    const genreColors = [];
-    const nb_genre = uniqueNames['genre'].size;
-
-    const min_color_value = 150;
-    const colorScale = d3.scaleLinear()
-                         .domain([0, 255])
-                         .range([min_color_value, 255]);
-    const colorScaleComplement = d3.scaleLinear()
-                         .domain([0, 255])
-                         .range([255, min_color_value]);
-
-    // RED 
-    for (let i = 0; i < nb_region; i++) {
-        const color_value = Math.floor((i * 256) / nb_region);
-        regionColors.push(`rgb(0,
-                               ${colorScale(color_value)},
-                               ${colorScaleComplement(color_value)})`);
-    }
-    // GREEN
-    for (let i = 0; i < nb_platform; i++) {
-        const color_value = Math.floor((i * 256) / nb_platform);
-        platformColors.push(`rgb(${colorScaleComplement(color_value)},
-                               0,
-                               ${colorScale(color_value)})`);
-    }
-    // BLUE
-    for (let i = 0; i < nb_genre; i++) {
-        const color_value = Math.floor((i * 256) / nb_genre);
-        genreColors.push(`rgb(${colorScale(color_value)},
-                              ${colorScaleComplement(color_value)},
-                              0)`);
-    }
-
-    function getIndexInCategory(node, categorySets) {
-        return Array.from(categorySets[node.category]).indexOf(node.name);
-    }
-    
-    data.nodes.forEach(node => {
-        const indexInCategory = getIndexInCategory(node, uniqueNames);
-        if (node.category === 'platform') {
-            node.color = platformColors[indexInCategory];
-        } else if (node.category === 'region') {
-            node.color = regionColors[indexInCategory];
-        } else if (node.category === 'genre') {
-            node.color = genreColors[indexInCategory];
-        }
-    });
-
-    // const color = d3.scaleOrdinal(graph.nodes.map(d => d.color), d3.schemeCategory10);
-
+    // Colors
+    addColor(data)
 
     // Create and style the link elements
     svg.append("g")
@@ -187,6 +130,7 @@ function createSankeyDiagram(data, links) {
         .style("fill", "none") // why the .style and not .attr ?
         .style("opacity", 0.5);
     
+    // Add nodes
     nodes.append("rect")
         .attr("x", d => d.x0)
         .attr("y", d => d.y0)
@@ -197,7 +141,7 @@ function createSankeyDiagram(data, links) {
         .attr("stroke", "black");
         // .attr("fill", "#69b3a2");
 
-    // Add node labels
+    // Add nodes' labels
     nodes.append("text")
         .attr("x", d => d.x0 < width / 2 ? d.x1 + 6 : d.x0 - 6)
         .attr("y", d => (d.y1 + d.y0) / 2)
@@ -206,21 +150,27 @@ function createSankeyDiagram(data, links) {
         .text(d => d.name);
 
     // Add mouse events for hover image
-    nodes.on("mouseover", (event, d) => showHoverImage(event, d, links))
+    nodes.on("mouseover", (event, d) => showHoverImage(event, d, urls))
          .on("mouseout" , hideHoverImage);
 }
 
-function showHoverImage(event, d, nodeDetails) {
+
+// ================================================================
+// HOVER IMAGES
+// ============
+
+// Show Hover Image
+function showHoverImage(event, d, urls) {
     const hoverImageContainer = d3.select("#hover-image-container");
-    const imageUrl = getImageUrl(d.name, nodeDetails);
-    const wikiUrl = getWikipediaUrl(d.name, nodeDetails);
+    const imageUrl = getImageUrl(d.name, urls);
+    const wikiUrl = getWikipediaUrl(d.name, urls);
 
     clearTimeout(hoverImageContainer.property("showTimeout"));
     const showTimeout = setTimeout(() => {
         hoverImageContainer
             .style("display", "block")
-            .style("left", (event.pageX + 10) + "px")
-            .style("top", (event.pageY + 10) + "px")
+            .style("left", (event.pageX + 20) + "px")
+            .style("top", (event.pageY + 0) + "px")
             .html(`<a href="${wikiUrl}" target="_blank"><img src='${imageUrl}' alt="${d.name}" width="200" /></a>`);
 
         hoverImageContainer
@@ -230,9 +180,10 @@ function showHoverImage(event, d, nodeDetails) {
             })
             .on("mouseout", hideHoverImage);
     }, 1000);
-    hoverImageContainer.property("showTimeout", showTimeout)
+    hoverImageContainer.property("showTimeout", showTimeout);
 }
 
+// Hide Hover Image
 function hideHoverImage() {
     const hoverImageContainer = d3.select("#hover-image-container");
     clearTimeout(hoverImageContainer.property("showTimeout"));
@@ -247,12 +198,95 @@ function hideHoverImage() {
     hoverImageContainer.property("hideTimeout", hideTimeout);
 }
 
-function getImageUrl(nodeName, nodeDetails) {
-    const node = nodeDetails.find(detail => detail.name === nodeName);
-    return node ? `./assets/img/platforms/${node.image}` : './assets/img/platforms/Psp-1000.jpg';
+// Image URL
+function getImageUrl(name, urls) {
+    const url = urls.find(detail => detail.name === name);
+    return url ? `./assets/img/platforms/${url.image}` : './assets/img/platforms/Psp-1000.jpg';
 }
 
-function getWikipediaUrl(nodeName, nodeDetails) {
-    const node = nodeDetails.find(detail => detail.name === nodeName);
-    return node ? node.wikipedia : "https://en.wikipedia.org/wiki/Sankey_diagram";
+// Wiki URL
+function getWikipediaUrl(name, urls) {
+    const url = urls.find(detail => detail.name === name);
+    return url ? url.wikipedia : "https://en.wikipedia.org/wiki/Sankey_diagram";
+}
+
+
+// ================================================================
+// COLORS
+// ======
+
+function addColor(data) {
+
+    // set of categories
+    const categories = {
+        platform: new Set(data.nodes.filter(node => node.category === 'platform').map(node => node.name)),
+        region: new Set(data.nodes.filter(node => node.category === 'region').map(node => node.name)),
+        genre: new Set(data.nodes.filter(node => node.category === 'genre').map(node => node.name)),
+    };
+    
+    const colorRegion = []
+    const colorPlatform = []
+    const colorGenre = [
+        'rgb(217, 237, 146)', 'rgb(181, 228, 140)', 'rgb(145, 219, 134)', 'rgb(153, 217, 140)',
+        'rgb(121, 207, 144)', 'rgb(118, 200, 147)', 'rgb(82, 182, 154)', 'rgb(52, 160, 164)',
+        'rgb(38, 149, 169)', 'rgb(22, 138, 173)', 'rgb(26, 117, 159)', 'rgb(30, 96, 145)',
+        'rgb(27, 75, 131)','rgb(24, 78, 119)']
+
+
+
+    // Color Scale
+    const min_color_value = 150;
+    const colorScale = d3.scaleLinear()
+                         .domain([0, 255])
+                         .range([min_color_value, 255]);
+    const colorScaleComplement = d3.scaleLinear()
+                         .domain([0, 255])
+                         .range([255, min_color_value]);
+
+    // Region
+    const regionColors = [];
+    const nb_region = categories['region'].size;
+    for (let i = 0; i < nb_region; i++) {
+        const color_value = Math.floor((i * 256) / nb_region);
+        regionColors.push(`rgb(0,
+                               ${colorScale(color_value)},
+                               ${colorScaleComplement(color_value)})`);
+    }
+    // Platform
+    const platformColors = [];
+    const nb_platform = categories['platform'].size;
+    for (let i = 0; i < nb_platform; i++) {
+        const color_value = Math.floor((i * 256) / nb_platform);
+        platformColors.push(`rgb(${colorScaleComplement(color_value)},
+                               0,
+                               ${colorScale(color_value)})`);
+    }
+    // Genre
+    const genreColors = [];
+    const nb_genre = categories['genre'].size;
+    for (let i = 0; i < nb_genre; i++) {
+        const color_value = Math.floor((i * 256) / nb_genre);
+        genreColors.push(`rgb(${colorScale(color_value)},
+                              ${colorScaleComplement(color_value)},
+                              0)`);
+    }
+
+    // const color = d3.scaleOrdinal(graph.nodes.map(d => d.color), d3.schemeCategory10);
+    
+    // map name to index
+    function getIndexInCategory(node, categories) {
+        return Array.from(categories[node.category]).indexOf(node.name);
+    }
+    
+    // add .color value to nodes
+    data.nodes.forEach(node => {
+        const indexInCategory = getIndexInCategory(node, categories);
+        if (node.category === 'platform') {
+            node.color = platformColors[indexInCategory];
+        } else if (node.category === 'region') {
+            node.color = regionColors[indexInCategory];
+        } else if (node.category === 'genre') {
+            node.color = genreColors[indexInCategory];
+        }
+    });
 }
