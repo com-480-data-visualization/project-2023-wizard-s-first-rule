@@ -73,67 +73,87 @@ function updateSankey(selectedOption, data, links) {
 
 function createSankeyDiagram(data, urls) {
     // Set the dimensions and margins of the diagram
-    const width = 800 - margin.left - margin.right;
-    const height = 600 - margin.top - margin.bottom;
+    const svg_width = 800;
+    const svg_height = 600;
+    const width = svg_width - margin.left - margin.right;
+    const height = svg_height - margin.top - margin.bottom;
 
     // remove previous svg
     // d3.select("#sankey").select("svg").remove();
 
     // Create an SVG container for the diagram
     const svg = d3.select("#sankey")
-        .append("svg")
-        .attr("viewBox", [0,
-                          0,
-                          width + margin.left + margin.right,
-                          height + margin.top + margin.bottom])
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
-        .append("g")
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+                  .append("svg")
+                  // .attr("viewBox", [0,0, svg_width, svg_height])
+                  .attr("width",  svg_width)
+                  .attr("height", svg_height);
+                  // .append("g")
+                  // .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
     
+    const node_width = 15;
+    const node_padding = 15;
+
     // Set up the Sankey generator
     const sankey = d3.sankey()
-        .nodeAlign(d3.sankeyCenter)
-        .nodeWidth(15)
-        .nodePadding(10)
-        .extent([[margin.left, margin.top], [width - margin.right, height - margin.bottom]]);
+                     .nodeAlign(d3.sankeyCenter) // sankeyLeft | sankeyRight | sankeyCenter | sankeyJustify
+                     .nodeWidth(node_width)   // default is 24
+                     .nodePadding(node_padding) // default is 8
+                     .iterations(100) // default is 6
+                     .extent([[margin.left, margin.top], [svg_width - margin.right, svg_height - margin.bottom]]);
 
+    sankey.nodeId(d => d.name); // set target/source of link to d.name (as it is in datasets), default is index
     // Convert source and target names to indices
-    const nodeIndex = new Map(data.nodes.map((node, index) => [node.name, index]));
-    data.links.forEach(link => {
-        link.source = nodeIndex.get(link.source);
-        link.target = nodeIndex.get(link.target);
-    });
+    // const nodeIndex = new Map(data.nodes.map((node, index) => [node.name, index]));
+    // data.links.forEach(link => {
+    //     link.source = nodeIndex.get(link.source);
+    //     link.target = nodeIndex.get(link.target);
+    // });
+
+    sankey.nodeSort(d => d.index);
+    sankey.nodeSort((a,b) => a.value-b.value);// sort nodes in increasing value order
+    // sankey.nodeSort((a,b) => b.value-a.value); // sort nodes in decreasing value order
+    // sankey.nodeSort((a,b) => b.name.localeCompare(a.name)); // sort all nodes in decreasing order
+    // sankey.nodeSort((a,b) => d3.descending(a.name, b.name)); // sort all nodes in increasing alphabetic order (see PS1/PS2/... for example)
+    // sankey.nodeSort((a,b) => d3.ascending(a.name, b.name)); // sort all nodes in increasing alphabetic order (see PS1/PS2/... for example)
+
+    // sankey.nodeSort((a,b) => {
+    //     if (a.category === 'genre'){
+    //         if (a.category === b.category){
+    //             return d3.ascending(a.name, b.name)
+    //         }
+    //     }
+    // });
+
 
     // Create a Sankey graph from the data
     const graph = sankey(data);
-
-    // Create and style the node elements
-    const nodes = svg.append("g")
-    .selectAll("g")
-    .data(graph.nodes)
-    .join("g");
-    // .attr("transform", d => `translate(${d.x0},${d.y0})`)
 
     // Colors
     addColor(data)
 
     // Create and style the link elements
-    svg.append("g")
-        .selectAll("path") // 'g'
-        .data(graph.links)
-        .join("path") // 'g'
-        .attr("d", d3.sankeyLinkHorizontal())
-        .attr("stroke", d => graph.nodes[d.source.index].color) // "#000"
-        // .attr("stroke", d => color(d.source.name)) // "#000"
-        .attr("stroke-width", d => Math.max(1, d.width))
-        .style("fill", "none") // why the .style and not .attr ?
-        .style("opacity", 0.5);
-    
+    const links = svg.append("g")
+                     .selectAll("path") // 'g'
+                     .data(graph.links)
+                     .join("path") // 'g'
+                     .attr("d", d3.sankeyLinkHorizontal())
+                     .attr("stroke", d => graph.nodes[d.source.index].color)
+                    //  .attr("stroke-width", d => Math.max(1, d.width))
+                     .attr("stroke-width", d => d.width)
+                     .attr("fill", "none")
+                     .attr("opacity", 0.5);
+
+    // Create and style the node elements
+    const nodes = svg.append("g")
+                      .selectAll("g")
+                      .data(graph.nodes)
+                      .join("g");
+
     // Add nodes
     nodes.append("rect")
         .attr("x", d => d.x0)
         .attr("y", d => d.y0)
+        // .attr("height", d => Math.max(1, d.y1 - d.y0))
         .attr("height", d => d.y1 - d.y0)
         .attr("width", d => d.x1 - d.x0)
         .attr("fill", d => d.color)
@@ -150,7 +170,13 @@ function createSankeyDiagram(data, urls) {
         .text(d => d.name);
 
     // Add mouse events for hover image
-    nodes.on("mouseover", (event, d) => showHoverImage(event, d, urls))
+    nodes.append("rect")
+         .attr("x", d => d.x0-node_padding/2)
+         .attr("y", d => d.y0-node_padding/2)
+         .attr("height", d => (d.y1 - d.y0)+node_padding)
+         .attr("width", d => (d.x1 - d.x0)+node_padding)
+         .attr("fill", "transparent")
+         .on("mouseover", (event, d) => showHoverImage(event, d, urls))
          .on("mouseout" , hideHoverImage);
 }
 
@@ -214,6 +240,64 @@ function getWikipediaUrl(name, urls) {
 // ================================================================
 // COLORS
 // ======
+function addColor(data) {
+
+    const interpolation_region = d3.interpolateRainbow;
+    const interpolation_genre = d3.interpolateRainbow;
+    const interpolation_platform = d3.interpolateRainbow;
+    /*
+        interpolateReds
+        interpolateGreens
+        interpolateBlues
+        interpolatePurples
+        interpolateOranges
+        interpolateGreys
+        ---
+        interpolateViridis
+        interpolateInferno
+        interpolateMagma
+        interpolatePlasma
+        interpolateWarm
+        interpolateCool
+        interpolateRainbow
+        interpolateCubehelixDefault
+    */
+
+
+    function get_min(type){
+        return d3.min(data.nodes, d => {
+            if (d.category === type) return d.value;
+        });
+    }
+    function get_max(type){
+        return d3.max(data.nodes, d => {
+            if (d.category === type) return d.value;
+        });
+    }
+
+    function get_cScale(type, interpolation){
+        return d3.scaleSequential(interpolation)
+                 .domain([0.5*get_min(type), 1.2*get_max(type)]);
+    }
+
+    // create color scales
+    const colorScaleRegion   = get_cScale('region', interpolation_region);
+    const colorScaleGenre    = get_cScale('genre', interpolation_genre);
+    const colorScalePlatform = get_cScale('platform', interpolation_platform);
+
+    // add .color value to nodes
+    data.nodes.forEach(node => {
+        if(node.category === 'region') {
+            node.color = colorScaleRegion(node.value);
+        } else if (node.category === 'genre'){
+            node.color = colorScaleGenre(node.value);
+        } else { // category 'platform'
+            node.color = colorScalePlatform(node.value);
+        }
+    });
+}
+
+/*
 
 function addColor(data) {
 
@@ -223,16 +307,6 @@ function addColor(data) {
         region: new Set(data.nodes.filter(node => node.category === 'region').map(node => node.name)),
         genre: new Set(data.nodes.filter(node => node.category === 'genre').map(node => node.name)),
     };
-    
-    const colorRegion = []
-    const colorPlatform = []
-    const colorGenre = [
-        'rgb(217, 237, 146)', 'rgb(181, 228, 140)', 'rgb(145, 219, 134)', 'rgb(153, 217, 140)',
-        'rgb(121, 207, 144)', 'rgb(118, 200, 147)', 'rgb(82, 182, 154)', 'rgb(52, 160, 164)',
-        'rgb(38, 149, 169)', 'rgb(22, 138, 173)', 'rgb(26, 117, 159)', 'rgb(30, 96, 145)',
-        'rgb(27, 75, 131)','rgb(24, 78, 119)']
-
-
 
     // Color Scale
     const min_color_value = 150;
@@ -290,3 +364,5 @@ function addColor(data) {
         }
     });
 }
+
+*/
