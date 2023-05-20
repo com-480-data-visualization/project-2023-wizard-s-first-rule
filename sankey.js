@@ -12,6 +12,21 @@ TODO:
 
 - add values in a tooltip for the user to knwo it !
 
+- enlever unkGenre
+
+- connect platforms to region on the right --> hot to handle pictures ?
+
+- show image on graph when hover text or elwhere when shadow node (cause of link shadow)?
+
+---
+RK
+---
+- japan is putting RolePlay in 4th position and barely play Shooter... ?
+- La Wii c'est beaucoup le sport et la music
+et le sport c'est la wii aussi
+- la DS : la simulation
+- Shooters c'est xb360
+- par la couleur on peut voir un gros gap entre PS et GBA (no orange)
 */
 
 
@@ -21,7 +36,7 @@ const svg_height           = 600;
 const platform_image_width = 200;
 const margin = {top: 10, right: 10, bottom: 10, left: 10};
 
-const categories = ["region", "genre", "platform"];
+const categories = ["regionL", "genre", "platform", "regionR"];
 
 // read datas
 let data, urls;
@@ -30,9 +45,15 @@ let graph, sankey, svg;
 // elements
 let nodes, links, labels, hover;
 
+
+
+// DEFAULTS
+const default_opacity = 0.75;
+const emphase_opacity = 0.95;
+const shadow_opacity = 0.15;
 const node_width = 15;   // default is 24
-const node_padding = 12; // default is 8
-const iterations = 100;  // default is 6
+const node_padding = 0; // default is 8
+const iterations = 200;  // default is 6
 
 const duration = 1500;
 
@@ -119,7 +140,13 @@ function setSVG(){
                 .selectAll(".label")
                 .data(graph.nodes)
                 .join("text")
-                .attr("class", "label");
+                .attr("class", "label")
+                .on("mouseover", (event, d) =>{
+                    showHoverImage(event, d);
+                })
+                .on("mouseout" , () =>{
+                    hideHoverImage();
+                });;
 
     // Add mouse events for hover image
     hover = svg .append("g")
@@ -127,8 +154,14 @@ function setSVG(){
                 .data(graph.nodes)
                 .join("rect")
                 .attr("class", "hover")
-                .on("mouseover", (event, d) => showHoverImage(event, d))
-                .on("mouseout" , hideHoverImage);
+                .on("mouseover", (event, d) =>{
+                    showHoverImage(event, d);
+                    shadows_links(d);
+                })
+                .on("mouseout" , () =>{
+                    hideHoverImage();
+                    shadows_reset();
+                });
 }
 
 function drawSankey() {
@@ -144,7 +177,7 @@ function drawSankey() {
             // .attr("stroke-width", d => d.width)
             .attr("stroke-width", d => Math.max(1, d.width))
             .attr("fill", "none")
-            .attr("opacity", 0.5);
+            .attr("opacity", default_opacity);
 
     // Transition the nodes
     nodes   .transition()
@@ -183,39 +216,38 @@ function showHoverImage(event, d) {
     const imageUrl = getImageUrl(d.name, urls);
     const wikiUrl = getWikipediaUrl(d.name, urls);
 
-    if(d.category === categories[2]){ // Platform
-    // clearTimeout(hoverImageContainer.property("showTimeout"));
-    // const showTimeout = setTimeout(() => {
+    // only images for category platform
+    if(d.category === categories[2]){
+        clearTimeout(hoverImageContainer.property("showTimeout"));
+        const showTimeout = setTimeout(() => {
 
-        clearTimeout(hoverImageContainer.property("hideTimeout"));
+            clearTimeout(hoverImageContainer.property("hideTimeout"));
 
-        hoverImageContainer
-            .style("display", "block")
-            .style("left", (event.pageX + 20) + "px")
-            .style("top",  (event.pageY + 0) + "px")
-            .html(`<a href="${wikiUrl}" target="_blank"><img src='${imageUrl}' alt="${d.name}" width="${platform_image_width}" /></a>`);
+            hoverImageContainer
+                .style("display", "block")
+                .style("left", (event.pageX + 20) + "px")
+                .style("top",  (event.pageY + 0) + "px")
+                .html(`<a href="${wikiUrl}" target="_blank"><img src='${imageUrl}' alt="${d.name}" width="${platform_image_width}" /></a>`);
 
-        hoverImageContainer
-            .on("mouseover", () => {
-                clearTimeout(hoverImageContainer.property("hideTimeout"));
-                // hoverImageContainer.style("display", "block");
-            })
-            .on("mouseout", hideHoverImage);
-    // }, 1000);
-    // hoverImageContainer.property("showTimeout", showTimeout);
-        }
+            hoverImageContainer
+                .on("mouseover", () => {
+                    clearTimeout(hoverImageContainer.property("hideTimeout"));
+                    // hoverImageContainer.style("display", "block");
+                })
+                .on("mouseout", hideHoverImage);
+        }, 400);
+        hoverImageContainer.property("showTimeout", showTimeout);
+    }
 }
 
 // Hide Hover Image
 function hideHoverImage() {
     const hoverImageContainer = d3.select("#hover-image-container");
 
-    // Set a timeout to hide the image after 2 seconds
     const hideTimeout = setTimeout(() => {
         hoverImageContainer.style("display", "none");
     }, 500);
 
-    // Store the hideTimeout in the hoverImageContainer's property
     hoverImageContainer.property("hideTimeout", hideTimeout);
 }
 
@@ -229,6 +261,40 @@ function getImageUrl(name, urls) {
 function getWikipediaUrl(name, urls) {
     const url = urls.find(detail => detail.name === name);
     return url ? url.wikipedia : "https://en.wikipedia.org/wiki/Sankey_diagram";
+}
+
+// ======================================================================
+// ============================================================== SHADOWS
+// ======================================================================
+function shadows_links(d){
+    d3  .selectAll(".link")
+        .data(graph.links)
+        .filter(l => l.source.category === d.category || l.target.category === d.category)
+        .attr("opacity", shadow_opacity);
+
+    d3  .selectAll(".link")
+        .filter(l => l.source.name === d.name || l.target.name === d.name)
+        .attr("opacity", emphase_opacity);
+
+    d3  .selectAll(".node")
+        .data(graph.nodes)
+        .filter(n => n.category === d.category)
+        .attr("opacity", shadow_opacity);
+    
+    d3  .selectAll(".node")
+        .filter(n => n.name === d.name)
+        .attr("opacity", emphase_opacity);
+
+}
+
+function shadows_reset(){
+    d3  .selectAll(".link")
+        .data(graph.links)
+        .attr("opacity", default_opacity);   
+    
+    d3  .selectAll(".node")
+        .data(graph.nodes)
+        .attr("opacity", default_opacity);
 }
 
 // ======================================================================
@@ -307,6 +373,7 @@ function des_name(a,b){
 function asc_name(a,b){
     return d3.descending(a.name, b.name);
 }
+// [RK] seems in reversed order... ?
 const sortings = dropdown_values.reduce((obj, key, index) => {
                     obj[key] = dropdown_sortings[index];
                     return obj;
@@ -365,7 +432,7 @@ function addColor(data) {
     // add .color value to nodes
     data.nodes.forEach(node => {
 
-        // Region
+        // RegionL
         if(node.category === categories[0]) {
             node.color = colorScaleRegion(node.value);
             
@@ -374,8 +441,12 @@ function addColor(data) {
             node.color = colorScaleGenre(node.value);
         
         // Platform
-        } else {
+        } else if (node.category === categories[2]){
             node.color = colorScalePlatform(node.value);
+        }
+        // RegionL
+        if(node.category === categories[3]) {
+            node.color = colorScaleRegion(node.value);
         }
     });
 }
