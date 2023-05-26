@@ -31,7 +31,7 @@ et le sport c'est la wii aussi
 
 
 // Set the dimensions and margins of the diagram
-const svg_width            = 1000;
+const svg_width            = 900;
 const svg_height           = 600;
 const platform_image_width = 200;
 const margin = {top: 10, right: 10, bottom: 10, left: 10};
@@ -49,20 +49,23 @@ let nodes, links, labels, hover;
 
 // DEFAULTS
 const default_opacity = 0.75;
-const emphase_opacity = 0.95;
-const shadow_opacity = 0.15;
+const emphase_opacity = 1;
+const shadow_opacity = 0.05;
 const node_width = 15;   // default is 24
-const node_padding = 0; // default is 8
+const node_padding = 10; // default is 8
+const reading_padding = 15;
 const iterations = 200;  // default is 6
 
 const duration = 1500;
+const hide_timeout = 1500;
 
+
+// loadAndCreateSankey_json(); // nodes/links pre-computed and loaded from json file
 loadAndCreateSankey();
-
 // ======================================================================
-// ========================================================= LOADING DATA
+// =============================================== LOAD AND CREATE SANKEY
 // ======================================================================
-async function loadAndCreateSankey() {
+async function loadAndCreateSankey_json() {
     try {
         const [read_data, read_urls] = await Promise.all([
             d3.json("./datasets/sankey.json"),
@@ -70,7 +73,22 @@ async function loadAndCreateSankey() {
         ]);
         data = read_data;
         urls = read_urls;
+        console.log(data);
         createDropdowns();
+        createSankeyDiagram();
+    } catch (error) {
+        console.error("Error loading or processing data:", error);
+    }
+}
+
+async function loadAndCreateSankey() {
+    try {
+        const read_urls = await d3.json("./datasets/sankey_links.json");
+        data = await loadSankeyData();
+        urls = read_urls;
+        createDropdowns();
+        createSlider();
+        createCheckbox();
         createSankeyDiagram();
     } catch (error) {
         console.error("Error loading or processing data:", error);
@@ -81,23 +99,13 @@ async function loadAndCreateSankey() {
 // =============================================================== CREATE
 // ======================================================================
 function createSankeyDiagram() {
-
-    // Create an SVG container for the diagram
-    svg = d3.select("#sankey")
-            .append("svg")
-            // .attr("viewBox", [0,0, svg_width, svg_height])
-            .attr("width",  svg_width)
-            .attr("height", svg_height);
-            // .append("g")
-            // .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
     // Set up the Sankey generator
     sankey = d3 .sankey()
                 .nodeAlign(d3.sankeyJustify) // sankeyLeft | sankeyRight | sankeyCenter | sankeyJustify
                 .nodeWidth(node_width)  
                 .nodePadding(node_padding)
                 .iterations(iterations)
-                .extent([[margin.left, margin.top], [svg_width - margin.right - platform_image_width, svg_height - margin.bottom]]);
+                .extent([[margin.left, margin.top], [svg_width - margin.right, svg_height - margin.bottom]]);
 
     // set target/source of link to d.name (as it is in datasets), default is index
     sankey.nodeId(d => d.name);
@@ -120,6 +128,15 @@ function setSVG(){
     graph = sankey(data);
     addColor(data);
 
+    // Create an SVG container for the diagram
+    svg = d3    .select("#sankey")
+                .append("svg")
+                // .attr("viewBox", [0,0, svg_width, svg_height])
+                .attr("width",  svg_width)
+                .attr("height", svg_height);
+                // .append("g")
+                // .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
     // Add links
     links = svg .append("g")
                 .selectAll(".link")
@@ -140,13 +157,16 @@ function setSVG(){
                 .selectAll(".label")
                 .data(graph.nodes)
                 .join("text")
-                .attr("class", "label")
+                .attr("class", "label");
+
+    // hover Platform label show image
+    labels  .filter(l => l.category === categories[2])
                 .on("mouseover", (event, d) =>{
                     showHoverImage(event, d);
                 })
                 .on("mouseout" , () =>{
                     hideHoverImage();
-                });;
+                });
 
     // Add mouse events for hover image
     hover = svg .append("g")
@@ -155,13 +175,22 @@ function setSVG(){
                 .join("rect")
                 .attr("class", "hover")
                 .on("mouseover", (event, d) =>{
-                    showHoverImage(event, d);
                     shadows_links(d);
+                    show_tooltip(d);
                 })
-                .on("mouseout" , () =>{
-                    hideHoverImage();
-                    shadows_reset();
-                });
+                .on("mouseout" , () => shadows_reset());
+
+    hover   .filter(h => h.category === categories[2])
+            .on("mouseover", (event, d) =>{
+                showHoverImage(event, d);
+                shadows_links(d);
+                show_tooltip(d);
+
+            })
+            .on("mouseout" , () =>{
+                hideHoverImage();
+                shadows_reset();
+            });
 }
 
 function drawSankey() {
@@ -174,8 +203,7 @@ function drawSankey() {
             .duration(duration)
             .attr("d", d3.sankeyLinkHorizontal())
             .attr("stroke", d => graph.nodes[d.source.index].color)
-            // .attr("stroke-width", d => d.width)
-            .attr("stroke-width", d => Math.max(1, d.width))
+            .attr("stroke-width", d => link_width(d))
             .attr("fill", "none")
             .attr("opacity", default_opacity);
 
@@ -192,7 +220,11 @@ function drawSankey() {
     // Transition the labels
     labels  .transition()
             .duration(duration)
-            .text(d => d.name)
+            .text(d => {
+                if (d.category=='regionR' || d.category=='regionL'){
+                    return d.name.slice(0, -1);
+                } else  return d.name;
+             })
             .attr("x", d => d.x0 < svg_width / 2 ? d.x1 + 6 : d.x0 - 6)
             .attr("y", d => (d.y1 + d.y0) / 2)
             .attr("dy", "0.35em")
@@ -216,28 +248,34 @@ function showHoverImage(event, d) {
     const imageUrl = getImageUrl(d.name, urls);
     const wikiUrl = getWikipediaUrl(d.name, urls);
 
-    // only images for category platform
-    if(d.category === categories[2]){
-        clearTimeout(hoverImageContainer.property("showTimeout"));
-        const showTimeout = setTimeout(() => {
+    // hide already existing image id hideTimeout not already elapsed
+    hoverImageContainer.style("display", "none");
 
-            clearTimeout(hoverImageContainer.property("hideTimeout"));
+    // prevent showTimeout to erase new image
+    clearTimeout(hoverImageContainer.property("showTimeout"));
+    const showTimeout = setTimeout(() => {
 
-            hoverImageContainer
-                .style("display", "block")
-                .style("left", (event.pageX + 20) + "px")
-                .style("top",  (event.pageY + 0) + "px")
-                .html(`<a href="${wikiUrl}" target="_blank"><img src='${imageUrl}' alt="${d.name}" width="${platform_image_width}" /></a>`);
+        // prevent hideTimeout to erase new image
+        clearTimeout(hoverImageContainer.property("hideTimeout"));
 
-            hoverImageContainer
-                .on("mouseover", () => {
-                    clearTimeout(hoverImageContainer.property("hideTimeout"));
-                    // hoverImageContainer.style("display", "block");
-                })
-                .on("mouseout", hideHoverImage);
-        }, 400);
-        hoverImageContainer.property("showTimeout", showTimeout);
-    }
+        const svgBB =  svg.node().getBBox(); // BoundingBox
+
+        hoverImageContainer
+            .style("display", "block")
+            // .style("left", (event.pageX + 20) + "px")
+            // .style("top",  (event.pageY + 0) + "px")
+            .style("margin-left", (svgBB.x + svgBB.width + margin.left) + "px")
+            .html(`<a href="${wikiUrl}" target="_blank"><img src='${imageUrl}'
+                    alt="${d.name}" title="${d.name}" width="${platform_image_width}" /></a>`);
+
+        hoverImageContainer
+            .on("mouseover", () => {
+                clearTimeout(hoverImageContainer.property("hideTimeout"));
+                // hoverImageContainer.style("display", "block");
+            })
+            .on("mouseout", hideHoverImage);
+    }, 1);
+    hoverImageContainer.property("showTimeout", showTimeout);
 }
 
 // Hide Hover Image
@@ -246,9 +284,15 @@ function hideHoverImage() {
 
     const hideTimeout = setTimeout(() => {
         hoverImageContainer.style("display", "none");
-    }, 500);
+    }, hide_timeout);
 
     hoverImageContainer.property("hideTimeout", hideTimeout);
+}
+
+function updateImgPosition(event){
+    const hoverImageContainer = d3.select("#hover-image-container");
+    hoverImageContainer .style("left", (event.pageX + 20) + "px")
+                        .style("top",  (event.pageY + 0) + "px")
 }
 
 // Image URL
@@ -305,19 +349,23 @@ function createDropdowns(){
 
     container   .style("display", "flex")
                 .style("justify-content", "space-between")
-                .style("width", (svg_width - platform_image_width) +"px");
+                .style("width", (svg_width) +"px");
     // for (const category in categories) { // category is the index
     for (const category of categories) {    // category is the value
         const div = container   .append("div")
                                 .attr("id", "dropdown_" + category)
-                                .style("padding-left", margin.left+"px")
+                                .style("padding-left",  margin.left +"px")
                                 .style("padding-right", margin.right+"px");
         div .append("p")
             .text(category)
             .style("text-align", "center")
             .style("text-transform", "capitalize");
 
-        const select = div.append("select");
+        const select = div  .append("select")
+                            .on("change", (event) => {
+                                sort_nodes(event.target.value, category);
+                                drawSankey();
+                            });
         
         select  .selectAll("option")
                 .data(dropdown_values)
@@ -326,26 +374,13 @@ function createDropdowns(){
                 .text(d => d)
                 .attr("value", d => d);
     }
-
-    dropdownEventHandler();
-}
-
-function dropdownEventHandler(){
-    for (const category of categories) {
-        const dropdown = d3.select("#dropdown_" + category).select("select").node(); // .node() is to retrieve the DOM element
-
-        dropdown.addEventListener("change", (event) => {
-            sort_nodes(event.target.value, category);
-            drawSankey();
-        });
-    }
 }
 
 function sort_nodes(value, category){
     sankey.nodeSort((a,b) => {
         if (a.category===b.category){
             if (a.category===category){
-                    return sortings[value](a,b);
+                return sortings[value](a,b);
             } else {
                 // retrieve value of others categories
                 const other_value = d3.select("#dropdown_" + a.category).select("select").node().value;
@@ -354,6 +389,91 @@ function sort_nodes(value, category){
         }
     });
 }
+
+// ======================================================================
+// ============================================================= CHECKBOX
+// ======================================================================
+function createCheckbox(){
+        const container = d3.select("#checkbox-container");
+        container .style("display", "flex")
+                  .style("justify-content", "space-between")
+                  .style("width", (svg_width) +"px");
+
+        // Deploy
+        container.append("div")
+                 .attr("id", "checkbox_deploy")
+                 .style("padding-left",  margin.left +"px")
+                 .style("padding-right", margin.right+"px")
+                 .append("label")
+                 .text("deploy")
+                 .append("input")
+                 .attr("type", "checkbox")
+                 .attr("id", "padding-toggle")
+                 .on("change", (event) => {
+                     if(event.target.checked){
+                         sankey.nodePadding(reading_padding);
+                     } else sankey.nodePadding(0);
+                     drawSankey();
+                 });
+
+        container.append("div")
+                 .attr("id", "checkbox_minLinkWidth")
+                 .style("padding-left",  margin.left +"px")
+                 .style("padding-right", margin.right+"px")
+                 .append("label")
+                 .text("link min width")
+                 .append("input")
+                 .attr("type", "checkbox")
+                 .attr("id", "padding-toggle")
+                 .on("change", (event) => {
+                     if(event.target.checked){
+                        link_width = d => Math.max(1, d.width);
+                     } else link_width = d => d.width;
+                     drawSankey();
+                 });
+}
+
+var link_width = d => d.width;
+
+
+// ======================================================================
+// =============================================================== SLIDER
+// ======================================================================
+function createSlider() {
+    const container = d3.select("#slider-container");
+  
+    container
+      .style("padding-left", margin.left + "px")
+      .style("padding-right", margin.right + "px");
+  
+    container
+      .append("label")
+      .attr("for", "padding-slider")
+      .text("Padding: ");
+  
+    container
+      .append("span")
+      .attr("id", "padding-value")
+      .text(node_padding);
+  
+    container
+      .append("input")
+      .attr("type", "range")
+      .attr("id", "padding-slider")
+      .attr("min", 0)
+      .attr("max", 20)
+      .attr("step", 5)
+      .attr("value", node_padding)
+    //   .style("width", svg_height+"px")
+      .style("width", 100+"px")
+      .style("transform", "rotate(-90deg)")
+      .on("input", (event) => {
+            const paddingValue = +event.target.value; // Convert the value to a number
+            sankey.nodePadding(paddingValue);
+            drawSankey();
+            d3.select("#padding-value").text(paddingValue);
+        });
+  }
 
 // ======================================================================
 // ============================================================= SORTINGS
@@ -452,20 +572,123 @@ function addColor(data) {
 }
 
 // ======================================================================
-// ============================================================= OLD CODE
+// ============================================================== TOOLTIP
 // ======================================================================
-/*
-function loadAndCreateSankey(){
-    Promise.all([
-        d3.json("./datasets/sankey.json"),
-        d3.json("./datasets/sankey_links.json"),
-    ]).then(([read_data, read_urls]) => {
-        data = read_data;
-        urls = read_urls;
-        createDropdowns();
-        createSankeyDiagram();
-    }).catch(error => {
-        console.error("Error loading or processing data:", error);
-    });
+function show_tooltip(d){
+
+    const total_incoming = d.targetLinks.reduce((acc, link) => acc + link.value, 0);
+    const total_outgoing = d.sourceLinks.reduce((acc, link) => acc + link.value, 0);
+
+    d.targetLinks.forEach((link) => console.log(link.source.name + " : "+ link.value.toFixed(2)));
+    d.sourceLinks.forEach((link) => console.log(link.target.name + " : "+ link.value.toFixed(2)));
+
+    console.log(total_incoming.toFixed(2));
+    console.log(total_outgoing.toFixed(2));
+    // tooltip.html("Node: " + d.name + "<br>" + "Total Incoming: " + incoming + "<br>" + "Total Outgoing: " + outgoing);
+    // return tooltip.style("visibility", "visible");
 }
-*/
+
+// ======================================================================
+// ============================================================ LOAD DATA
+// ======================================================================
+async function loadSankeyData() {
+    try {
+        const raw_data = await d3.csv("./datasets/Video_Games_Sales_as_at_22_Dec_2016.csv");
+        return get_sankeyData(raw_data);
+    } catch (error) {
+        console.error("Error loading or processing data:", error);
+    }
+}
+
+function get_sankeyData(raw_data){
+    
+    const parsed_data = raw_data.filter(row => row['Genre']!='' || row['Name']!=''); // lose two line... OK
+
+    const platforms = [... new Set(parsed_data.map(row => row['Platform']))];
+    const genres = [... new Set(parsed_data.map(row => row['Genre']))];
+    // const regions = ['NA_Sales', 'EU_Sales', 'JP_Sales', 'Other_Sales'];
+    const regionsL = ['North AmericaL', 'European UnionL', 'JapanL', 'OtherL'];
+    const regionsR = ['North AmericaR', 'European UnionR', 'JapanR', 'OtherR'];
+    const map_region = new Map([
+        ['North AmericaL', 'NA_Sales'],
+        ['North AmericaR', 'NA_Sales'],
+        ['European UnionL', 'EU_Sales'],
+        ['European UnionR', 'EU_Sales'],
+        ['JapanL', 'JP_Sales'],
+        ['JapanR', 'JP_Sales'],
+        ['OtherL', 'Other_Sales'],
+        ['OtherR', 'Other_Sales'],
+
+    ]);
+
+    // SANKEY
+    let data_sankey = {
+        links: [],
+        nodes: []
+    };
+
+    // LINKS :
+    const source_str = 'source';
+    const target_str = 'target';
+    const value_str  = 'value';
+    regionsL.forEach((r) =>
+            genres.forEach((g) =>
+                data_sankey.links.push({
+                    [source_str]: r,
+                    [target_str]: g,
+                    [value_str] : parsed_data.filter(row => row['Genre']==g)
+                                             .reduce((acc, row) => acc + parseFloat(row[map_region.get(r)]),0)
+                })
+            )
+    );
+    genres.forEach((g) =>
+        platforms.forEach((p) =>
+            data_sankey.links.push({
+                [source_str]: g,
+                [target_str]: p,
+                [value_str] : parsed_data.filter(row => row['Genre']==g && row['Platform']==p)
+                                         .reduce((acc, row) => acc + parseFloat(row['Global_Sales']),0)
+            })
+        )
+    );
+    platforms.forEach((p) =>
+        regionsR.forEach((r) =>
+            data_sankey.links.push({
+                [source_str]: p,
+                [target_str]: r,
+                [value_str] : parsed_data.filter(row => row['Platform']==p)
+                                         .reduce((acc, row) => acc + parseFloat(row[map_region.get(r)]),0)
+            })
+        )
+    );
+
+    // NODES:
+    const name_str     = 'name';
+    const category_str = 'category';
+    regionsL.forEach((r) =>
+        data_sankey.nodes.push({
+            [name_str]: r,
+            [category_str]: 'regionL'
+        })
+    );
+    genres.forEach((g) =>
+        data_sankey.nodes.push({
+            [name_str]: g,
+            [category_str]: 'genre'
+        })
+    );
+    platforms.forEach((p) =>
+        data_sankey.nodes.push({
+            [name_str]: p,
+            [category_str]: 'platform'
+        })
+    );
+    regionsR.forEach((r) =>
+        data_sankey.nodes.push({
+            [name_str]: r,
+            [category_str]: 'regionR'
+        })
+    );
+
+    return data_sankey;
+}
