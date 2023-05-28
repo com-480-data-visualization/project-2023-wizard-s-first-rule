@@ -30,11 +30,18 @@ et le sport c'est la wii aussi
 */
 
 
+
+// TODO : check padding value for hover
+
+
 // Set the dimensions and margins of the diagram
-const svg_width            = 900;
+const svg_width            = 1000;
 const svg_height           = 600;
+const diagram_ratio        = 0.75;
 const platform_image_width = 200;
 const margin = {top: 10, right: 10, bottom: 10, left: 10};
+const diagram_width = diagram_ratio*svg_width;
+const barchart_width = svg_width-diagram_width;
 
 const categories = ["regionL", "genre", "platform", "regionR"];
 
@@ -51,8 +58,8 @@ let nodes, links, labels, hover;
 const default_opacity = 0.75;
 const emphase_opacity = 1;
 const shadow_opacity = 0.05;
-const node_width = 15;   // default is 24
-const node_padding = 10; // default is 8
+const node_width = 50;   // default is 24
+let node_padding = 10; // default is 8
 const reading_padding = 15;
 const iterations = 200;  // default is 6
 
@@ -63,7 +70,7 @@ const hide_timeout = 1500;
 // loadAndCreateSankey_json(); // nodes/links pre-computed and loaded from json file
 loadAndCreateSankey();
 // ======================================================================
-// =============================================== LOAD AND CREATE SANKEY
+// ================================================================= LOAD
 // ======================================================================
 async function loadAndCreateSankey_json() {
     try {
@@ -96,16 +103,15 @@ async function loadAndCreateSankey() {
 }
 
 // ======================================================================
-// =============================================================== CREATE
+// =============================================================== SANKEY
 // ======================================================================
 function createSankeyDiagram() {
     // Set up the Sankey generator
     sankey = d3 .sankey()
                 .nodeAlign(d3.sankeyJustify) // sankeyLeft | sankeyRight | sankeyCenter | sankeyJustify
                 .nodeWidth(node_width)  
-                .nodePadding(node_padding)
                 .iterations(iterations)
-                .extent([[margin.left, margin.top], [svg_width - margin.right, svg_height - margin.bottom]]);
+                .extent([[margin.left, margin.top], [diagram_width - margin.right, svg_height - margin.bottom]]);
 
     // set target/source of link to d.name (as it is in datasets), default is index
     sankey.nodeId(d => d.name);
@@ -115,10 +121,17 @@ function createSankeyDiagram() {
         if (a.category===b.category) return sortings[dropdown_values[0]](a,b);
     });
 
+
+    d3.select("#sankey")
+        .style("width", svg_width)
+        .style("display", "flex")
+        .style("justify-content", "space between");
+
     // Diagram rendering
     setSVG();
     drawSankey();
 }
+
 
 // ======================================================================
 // ================================================================== SVG
@@ -129,13 +142,14 @@ function setSVG(){
     addColor(data);
 
     // Create an SVG container for the diagram
-    svg = d3    .select("#sankey")
-                .append("svg")
+    svg = d3    .select("#diagram-container")
                 // .attr("viewBox", [0,0, svg_width, svg_height])
-                .attr("width",  svg_width)
-                .attr("height", svg_height);
-                // .append("g")
-                // .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+                .style("width", diagram_width + "px")
+                .append("svg")
+                .attr("width",  diagram_width + "px")
+                .attr("height", svg_height)
+                .append("g")
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
     // Add links
     links = svg .append("g")
@@ -174,29 +188,25 @@ function setSVG(){
                 .data(graph.nodes)
                 .join("rect")
                 .attr("class", "hover")
-                .on("mouseover", (event, d) =>{
+                .on("mouseover", (event, d) => {
                     shadows_links(d);
-                    show_tooltip(d);
+                    createBarchart(d);
                 })
-                .on("mouseout" , () => shadows_reset());
+                .on("mouseout" , () => {
 
-    hover   .filter(h => h.category === categories[2])
-            .on("mouseover", (event, d) =>{
-                showHoverImage(event, d);
-                shadows_links(d);
-                show_tooltip(d);
-
-            })
-            .on("mouseout" , () =>{
-                hideHoverImage();
-                shadows_reset();
-            });
+                    shadows_reset();
+                    removeBarchart();
+                });
 }
 
 function drawSankey() {
 
     // Update the graph and data
     graph = sankey(data);
+
+    // padding value
+    sankey.nodePadding(node_padding)
+
 
     // Transition the links
     links   .transition()
@@ -220,11 +230,7 @@ function drawSankey() {
     // Transition the labels
     labels  .transition()
             .duration(duration)
-            .text(d => {
-                if (d.category=='regionR' || d.category=='regionL'){
-                    return d.name.slice(0, -1);
-                } else  return d.name;
-             })
+            .text(d => get_name(d))
             .attr("x", d => d.x0 < svg_width / 2 ? d.x1 + 6 : d.x0 - 6)
             .attr("y", d => (d.y1 + d.y0) / 2)
             .attr("dy", "0.35em")
@@ -244,55 +250,52 @@ function drawSankey() {
 // ========================================================== HOVER IMAGE
 // ======================================================================
 function showHoverImage(event, d) {
-    const hoverImageContainer = d3.select("#hover-image-container");
+    const container = d3.select("#hover-image-container");
     const imageUrl = getImageUrl(d.name, urls);
     const wikiUrl = getWikipediaUrl(d.name, urls);
 
-    // hide already existing image id hideTimeout not already elapsed
-    hoverImageContainer.style("display", "none");
+    // hide others image  
+    container.style("display", "none");
 
     // prevent showTimeout to erase new image
-    clearTimeout(hoverImageContainer.property("showTimeout"));
+    clearTimeout(container.property("showTimeout"));
     const showTimeout = setTimeout(() => {
 
         // prevent hideTimeout to erase new image
-        clearTimeout(hoverImageContainer.property("hideTimeout"));
+        clearTimeout(container.property("hideTimeout"));
 
         const svgBB =  svg.node().getBBox(); // BoundingBox
 
-        hoverImageContainer
+        container
             .style("display", "block")
-            // .style("left", (event.pageX + 20) + "px")
-            // .style("top",  (event.pageY + 0) + "px")
             .style("margin-left", (svgBB.x + svgBB.width + margin.left) + "px")
             .html(`<a href="${wikiUrl}" target="_blank"><img src='${imageUrl}'
                     alt="${d.name}" title="${d.name}" width="${platform_image_width}" /></a>`);
 
-        hoverImageContainer
+        container
             .on("mouseover", () => {
-                clearTimeout(hoverImageContainer.property("hideTimeout"));
-                // hoverImageContainer.style("display", "block");
+                clearTimeout(container.property("hideTimeout"));
             })
             .on("mouseout", hideHoverImage);
     }, 1);
-    hoverImageContainer.property("showTimeout", showTimeout);
+    container.property("showTimeout", showTimeout);
 }
 
 // Hide Hover Image
 function hideHoverImage() {
-    const hoverImageContainer = d3.select("#hover-image-container");
+    const container = d3.select("#hover-image-container");
 
     const hideTimeout = setTimeout(() => {
-        hoverImageContainer.style("display", "none");
+        container.style("display", "none");
     }, hide_timeout);
 
-    hoverImageContainer.property("hideTimeout", hideTimeout);
+    container.property("hideTimeout", hideTimeout);
 }
 
 function updateImgPosition(event){
-    const hoverImageContainer = d3.select("#hover-image-container");
-    hoverImageContainer .style("left", (event.pageX + 20) + "px")
-                        .style("top",  (event.pageY + 0) + "px")
+    const container = d3.select("#hover-image-container");
+    container   .style("left", (event.pageX + 20) + "px")
+                .style("top",  (event.pageY + 0)  + "px")
 }
 
 // Image URL
@@ -389,6 +392,27 @@ function sort_nodes(value, category){
         }
     });
 }
+// ============================================================= SORTINGS
+const dropdown_values = ["quantity ↑", "quantity ↓", "name ↑", "name ↓"];
+const dropdown_sortings = [asc_quantity, des_quantity, asc_name, des_name];
+
+function des_quantity(a,b){
+    return a.value-b.value;
+}
+function asc_quantity(a,b){
+    return b.value-a.value;
+}
+function des_name(a,b){
+    return d3.ascending(a.name, b.name);
+}
+function asc_name(a,b){
+    return d3.descending(a.name, b.name);
+}
+// [RK] seems in reversed order... ?
+const sortings = dropdown_values.reduce((obj, key, index) => {
+                    obj[key] = dropdown_sortings[index];
+                    return obj;
+                }, {});
 
 // ======================================================================
 // ============================================================= CHECKBOX
@@ -432,7 +456,7 @@ function createCheckbox(){
                      drawSankey();
                  });
 }
-
+// default link_width (at loading)
 var link_width = d => d.width;
 
 
@@ -452,11 +476,6 @@ function createSlider() {
       .text("Padding: ");
   
     container
-      .append("span")
-      .attr("id", "padding-value")
-      .text(node_padding);
-  
-    container
       .append("input")
       .attr("type", "range")
       .attr("id", "padding-slider")
@@ -468,36 +487,10 @@ function createSlider() {
       .style("width", 100+"px")
       .style("transform", "rotate(-90deg)")
       .on("input", (event) => {
-            const paddingValue = +event.target.value; // Convert the value to a number
-            sankey.nodePadding(paddingValue);
+            node_padding = +event.target.value;
             drawSankey();
-            d3.select("#padding-value").text(paddingValue);
         });
   }
-
-// ======================================================================
-// ============================================================= SORTINGS
-// ======================================================================
-const dropdown_values = ["quantity ↑", "quantity ↓", "name ↑", "name ↓"];
-const dropdown_sortings = [asc_quantity, des_quantity, asc_name, des_name];
-
-function des_quantity(a,b){
-    return a.value-b.value;
-}
-function asc_quantity(a,b){
-    return b.value-a.value;
-}
-function des_name(a,b){
-    return d3.ascending(a.name, b.name);
-}
-function asc_name(a,b){
-    return d3.descending(a.name, b.name);
-}
-// [RK] seems in reversed order... ?
-const sortings = dropdown_values.reduce((obj, key, index) => {
-                    obj[key] = dropdown_sortings[index];
-                    return obj;
-                }, {});
 
 // ======================================================================
 // =============================================================== COLORS
@@ -570,24 +563,6 @@ function addColor(data) {
         }
     });
 }
-
-// ======================================================================
-// ============================================================== TOOLTIP
-// ======================================================================
-function show_tooltip(d){
-
-    const total_incoming = d.targetLinks.reduce((acc, link) => acc + link.value, 0);
-    const total_outgoing = d.sourceLinks.reduce((acc, link) => acc + link.value, 0);
-
-    d.targetLinks.forEach((link) => console.log(link.source.name + " : "+ link.value.toFixed(2)));
-    d.sourceLinks.forEach((link) => console.log(link.target.name + " : "+ link.value.toFixed(2)));
-
-    console.log(total_incoming.toFixed(2));
-    console.log(total_outgoing.toFixed(2));
-    // tooltip.html("Node: " + d.name + "<br>" + "Total Incoming: " + incoming + "<br>" + "Total Outgoing: " + outgoing);
-    // return tooltip.style("visibility", "visible");
-}
-
 // ======================================================================
 // ============================================================ LOAD DATA
 // ======================================================================
@@ -691,4 +666,122 @@ function get_sankeyData(raw_data){
     );
 
     return data_sankey;
+}
+
+function get_name(d){
+    if (d.category=='regionR' || d.category=='regionL'){
+        return d.name.slice(0, -1);
+    }
+    return d.name;
+}
+
+// ======================================================================
+// ============================================================= BARCHART
+// ======================================================================
+function createBarchart(d) {
+    const values = get_inoutcoming_values(d);
+    const total_in = values.incoming.reduce((acc, d) => acc + +d.value,0);
+    const total_out = values.outgoing.reduce((acc, d) => acc + +d.value,0);
+    const total = d3.max([total_in,total_out]);
+
+    const container = d3.select("#barchart-container")
+                        .style("width", barchart_width+"px");
+    // d3.select("#hover-image-container").style("display", "none");
+
+
+    // container.append("p")
+    //          .text(get_name(d) +": " + total.toFixed(2));
+
+    // Create an SVG container for the diagram
+    chart = container   .append("svg")
+                        .attr("width",  barchart_width+"px")
+                        .attr("height", svg_height);
+                        // .append("g");
+                        // .attr("transform", `translate(${svg_width + margin.left}, ${margin.top})`);
+
+    const bar_width = (barchart_width - node_width)/2;
+
+    // Scale the range of the data in the y domain
+    const x_scale = d3  .scaleLinear()
+                        .domain([0, d3.max([...values.incoming, ...values.outgoing], d => +d.value)])
+                        .range([0, bar_width]);
+
+    const padding_value = 0;
+    const y_scale_in = d3   .scaleBand()
+                            .domain(values.incoming.map(d => d.name))
+                            .range([0, svg_height])
+                            .padding(padding_value);
+    const y_scale_out = d3  .scaleBand()
+                            .domain(values.outgoing.map(d => d.name))
+                            .range([0, svg_height])
+                            .padding(padding_value);
+
+    // Central Rect
+    chart .selectAll(".bars-node")
+        .data([d])
+        .enter()
+        .append("rect")
+        .attr("class", "bar-node")
+        .attr("fill", "white")
+        .attr("x", bar_width)
+        .attr("width", node_width)
+        .attr("y", 0)
+        .attr("height", svg_height);
+    const stroke_width = 3;
+    chart .selectAll(".bars-node")
+        .data([d])
+        .enter()
+        .append("rect")
+        .attr("class", "bar-node")
+        .attr("fill", d => d.color)
+        .attr("x", bar_width+stroke_width)
+        .attr("width", node_width-2*stroke_width)
+        .attr("y", 0)
+        .attr("height", svg_height);
+
+
+    // Incoming rect
+    chart .selectAll(".bars-in")
+        .data(values.incoming)
+        .enter()
+        .append("rect")
+        .attr("class", "bar-in")
+        .attr("fill", d => d.color)
+        .attr("x", d => bar_width-x_scale(d.value))
+        .attr("width",  d => x_scale(d.value))
+        .attr("y", d => y_scale_in(d.name))
+        .attr("height", y_scale_in.bandwidth());
+
+    // Outgoing rect
+    chart .selectAll(".bars-out")
+        .data(values.outgoing)
+        .enter()
+        .append("rect")
+        .attr("class", "bar-out")
+        .attr("fill", d => d.color)
+        // .attr("fill", d.color)
+        .attr("x", d => bar_width+node_width)
+        .attr("width",  d => x_scale(d.value))
+        .attr("y", d => y_scale_out(d.name))
+        .attr("height", y_scale_out.bandwidth());
+}
+
+function removeBarchart() {
+    d3.select("#barchart-container").selectAll("svg").remove();
+    d3.select("#barchart-container").selectAll("p").remove();
+}
+
+function get_inoutcoming_values(d){
+    let incoming = [], outgoing = [];
+    d.targetLinks.forEach((link) => incoming.push(
+        {"name": link.source.name, "value": link.value.toFixed(2), "color": link.source.color}
+    ));
+    d.sourceLinks.forEach((link) => outgoing.push(
+        {"name": link.target.name, "value": link.value.toFixed(2), "color": link.target.color}
+    ));
+
+    return {
+        "incoming": incoming.sort((a, b) => b.value - a.value),
+        "outgoing": outgoing.sort((a, b) => b.value - a.value),
+    };
 }
