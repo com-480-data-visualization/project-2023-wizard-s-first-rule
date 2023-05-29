@@ -102,6 +102,20 @@
           <div class="col-lg-6">
             <img src="assets/img/violin-plot-example.png" class="static graph">
           </div>
+          <div id="my_dataviz"></div>
+          <select id="widthDropdown" onchange="handleSelection()">
+            <option value="Global_Sales">Global Sales</option>
+            <option value="NA_Sales">NA Sales</option>
+            <option value="EU_Sales">EU Sales</option>
+            <option value="JP_Sales">JP Sales</option>
+            <option value="Other_Sales">Other Sales</option>
+          </select>
+
+          <select id="xDropdown" onchange="handleSelection()">
+            <option value="Platform">Platform</option>
+            <option value="Genre">Genre</option>
+            <option value="Publisher">Publisher</option>
+          </select>
           <div class="col-lg-6 pt-4 pt-lg-0">
             <p>
               Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore
@@ -240,8 +254,11 @@
   <script src="assets/vendor/waypoints/noframework.waypoints.js"></script>
   <script src="assets/vendor/php-email-form/validate.js"></script>
 
+  <script src="https://d3js.org/d3.v4.js"></script>
+
   <!-- Template Main JS File -->
   <script src="assets/js/main.js"></script>
+  <script src="assets/js/violin_plot.js"></script>
 
 </body>
 
