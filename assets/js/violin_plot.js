@@ -20,16 +20,21 @@ function myFunction(widthCat, xCat) {
   const width = 1060 - margin.left - margin.right;
   const height = 400 - margin.top - margin.bottom;
 
+  d3.select('#violinPlot').remove();
+
   // append the svg object to the body of the page
   const svg = d3.select('#my_dataviz')
     .append('svg')
+    .attr('id', 'violinPlot')
     .attr('width', width + margin.left + margin.right)
     .attr('height', height + margin.top + margin.bottom)
     .append('g')
     .attr(
       'transform',
       `translate(${margin.left},${margin.top})`,
-    );
+    )
+
+  // d3.select('#violinPlot').remove();
 
   // Read the data and compute summary statistics for each specie
   d3.csv('/datasets/vgsales.csv', (data) => {
@@ -122,7 +127,5 @@ function myFunction(widthCat, xCat) {
         .y((d) => (y(d.x0)))
         .curve(d3.curveCatmullRom), // This makes the line smoother to give the violin appearance. Try d3.curveStep to see the difference
       );
-  // .transition()
-  // .duration(1000)
   });
 }
