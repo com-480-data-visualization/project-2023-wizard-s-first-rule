@@ -1,23 +1,5 @@
 /*
 
-TODO:
-
-- set padding as a slider
-- hovering a node should lower the opacity of others node's link
-- set min value to 1 px as a toggle option
-
-- should place labels betters
-- better default image... even if never used
-- better positions foe image?
-
-- add values in a tooltip for the user to knwo it !
-
-- enlever unkGenre
-
-- connect platforms to region on the right --> hot to handle pictures ?
-
-- show image on graph when hover text or elwhere when shadow node (cause of link shadow)?
-
 ---
 RK
 ---
@@ -28,11 +10,6 @@ et le sport c'est la wii aussi
 - Shooters c'est xb360
 - par la couleur on peut voir un gros gap entre PS et GBA (no orange)
 */
-
-
-
-// TODO : check padding value for hover
-
 
 // Set the dimensions and margins of the diagram
 const total_height = 800;
