@@ -6,25 +6,27 @@
     <title>Sankey Diagram</title>
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script src="https://unpkg.com/d3-sankey@0.12.3/dist/d3-sankey.min.js"></script>
-    <style>
-        #hover-image-container {
-            position: absolute;
-            display: none;
-        }
-    </style>
+    
 </head>
 <body>
     
     <h1>Sankey Diagram</h1>
     <div id="container">
-        <div id="sankey">
-            <div id="diagram-container"></div>
-            <div id="barchart-container"></div>
+        <div id="grid-container">
+            <div id="col1-container">
+                <div id="checkbox-container"></div>
+                <div id="slider-container"></div>
+                <div id="hover-image-container"></div>
+            </div>
+            <div id="col2-container">
+                <div id="diagram-container"></div>
+                <div id="dropdowns-container"></div>
+            </div>
+            <div id="col3-container">
+                <div id="barchart-container"></div>
+                <div id="node-value-container"></div>
+            </div>
         </div>
-        <div id="hover-image-container"></div>
-        <div id="slider-container"></div>
-        <div id="dropdowns-container"></div>
-        <div id="checkbox-container"></div>
     </div>
     <script src="sankey.js"></script>
 </body>

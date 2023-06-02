@@ -99,7 +99,6 @@ function get_RacechartData(raw_data){
 
     const data = []
 
-    // LINKS :
     const date_str = 'date';
     const name_str = 'name';
     const value_str  = 'value';
