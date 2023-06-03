@@ -5,17 +5,25 @@ function handleSelection() {
   const dropdownX = document.getElementById('xDropdown');
   const selectedX = dropdownX.value;
 
-  myFunction(selectedWidth, selectedX);
+  displayViolinGraph(selectedWidth, selectedX);
 }
 
-function myFunction(widthCat, xCat) {
-  console.log('called with: ', widthCat, xCat);
+// When the page loads, call handleSelection
+window.addEventListener('load', handleSelection);
 
+/**
+ * Display a violin graph
+ * 
+ * @param {string} widthCat - The category for the width of the violin (e.g. Global_Sales)
+ * @param {string} xCat - The category for the x axis (e.g. Platform)
+ * @return {void}
+ */
+function displayViolinGraph(widthCat, xCat) {
   // Base code taken from https://d3-graph-gallery.com/graph/violin_basicHist.html
 
   // set the dimensions and margins of the graph
   const margin = {
-    top: 10, right: 30, bottom: 30, left: 40,
+    top: 10, right: 30, bottom: 120, left: 40,
   };
   const width = 1060 - margin.left - margin.right;
   const height = 400 - margin.top - margin.bottom;
@@ -38,8 +46,23 @@ function myFunction(widthCat, xCat) {
 
   // Read the data and compute summary statistics for each specie
   d3.csv('/datasets/vgsales.csv', (data) => {
-    // print the data
-    console.log(data);
+
+    // If x is Publisher, only show the top 10 publishers in terms of total sales
+    if (xCat === "Publisher"){
+      var publisherSales = {}
+      for (var i = 0; i < data.length; i++) {
+        var publisher = data[i].Publisher
+        var sales = parseFloat(data[i][widthCat])
+        if (publisherSales[publisher] == undefined){
+          publisherSales[publisher] = sales
+        } else {
+          publisherSales[publisher] += sales
+        }
+      }
+      var sortedPublisherSales = Object.keys(publisherSales).sort(function(a,b){return publisherSales[b]-publisherSales[a]})
+      var top10Publishers = sortedPublisherSales.slice(0,10)
+      data = data.filter(function(d){return top10Publishers.includes(d.Publisher)})
+    }
 
     // Build and Show the Y scale
     const y = d3.scaleLinear()
@@ -55,7 +78,11 @@ function myFunction(widthCat, xCat) {
       .padding(0.05); // This is important: it is the space between 2 groups. 0 means no padding. 1 is the maximum.
     svg.append('g')
       .attr('transform', `translate(0,${height})`)
-      .call(d3.axisBottom(x));
+      .call(d3.axisBottom(x)) // rotate the text labels
+      .selectAll('text')
+      .attr('transform', 'translate(-10,0)rotate(-45)')
+      .style('text-anchor', 'end');
+
 
     // Features of the histogram
     const histogram = d3.histogram()
@@ -78,34 +105,34 @@ function myFunction(widthCat, xCat) {
       .entries(data);
 
     /**
- * Get the sum of the sales for a given platform
- * @param {Array} a - The array of sales for a given platform
- * @return {Number} The sum of the sales for a given platform
- */
+     * Get the sum of the sales for a given platform
+     * @param {Number[]} a - The array of sales for a given platform
+     * @return {Number} The sum of the sales for a given platform
+     */
     function getSum(a) {
       return a
         .map((v) => v.sales)
         .reduce((partialSum, a) => partialSum + a, 0);
     }
 
-    console.log('sumstat: ', sumstat);
     // What is the biggest number of value in a bin? We need it cause this value will have a width of 100% of the bandwidth.
     let maxNum = 0;
     for (i in sumstat) {
-      console.log('-', i, ': ', sumstat[i]);
       allBins = sumstat[i].value;
       totalSales = allBins.map((a) => getSum(a));
-      console.log('totalSales: ', totalSales);
       longuest = d3.max(totalSales);
       if (longuest > maxNum) { maxNum = longuest; }
     }
-
-    console.error('maxNum: ', maxNum);
 
     // The maximum width of a violin must be x.bandwidth = the width dedicated to a group
     const xNum = d3.scaleLinear()
       .range([0, x.bandwidth()])
       .domain([-maxNum, maxNum]);
+
+    // Use color palette 
+    const colorScale = d3.scaleOrdinal()
+      .domain(categories)
+      .range(d3.range(sumstat.length).map((i) => d3.interpolateRainbow(i / sumstat.length)));
 
     // Add the shape to this svg!
     svg
@@ -116,11 +143,10 @@ function myFunction(widthCat, xCat) {
       .attr('transform', (d) => (`translate(${x(d.key)} ,0)`)) // Translation on the right to be at the group position
       .append('path')
       .datum((d) => {
-        console.log('datum: ', d, 'value: ', d.value);
         return (d.value);
       }) // So now we are working bin per bin
       .style('stroke', 'none')
-      .style('fill', '#69b3a2')
+      .style('fill', (d, i) => colorScale(i))
       .attr('d', d3.area()
         .x0((d) => (xNum(-getSum(d))))
         .x1((d) => (xNum(getSum(d))))
