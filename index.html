@@ -37,42 +37,43 @@
 
 <body>
 
+  <!-- ====================== -->
   <!-- ======= Header ======= -->
+  <!-- ====================== -->
   <header id="header" class="fixed-top ">
     <div class="container d-flex align-items-center">
 
       <h1 class="logo me-auto"><a href="index.html">COM-480 Project</a></h1>
-      <!-- Uncomment below if you prefer to use an image logo -->
-      <!-- <a href="index.html" class="logo me-auto"><img src="assets/img/logo.png" alt="" class="img-fluid"></a>-->
-
       <nav id="navbar" class="navbar">
         <ul>
           <li><a class="nav-link scrollto active" href="#hero">Home</a></li>
           <li class="dropdown"><a href="#"><span>Contents</span> <i class="bi bi-chevron-down"></i></a>
             <ul>
               <li><a href="#dataset">The Dataset</a></li>
-              <li><a href="#graph2">Graph2 Name</a></li>
+              <li><a href="#graph2">Barchart Race</a></li>
               <li><a href="#graph3">Graph3 Name</a></li>
-              <li><a href="#graph4">Graph4 Name</a></li>
+              <li><a href="#graph4">Sankey Diagram</a></li>
             </ul>
           </li>
           <li><a class="nav-link scrollto" href="#footer">About Us</a></li>
           <li><a class="getstarted scrollto" href="#dataset">Get Started</a></li>
         </ul>
         <i class="bi bi-list mobile-nav-toggle"></i>
-      </nav><!-- .navbar -->
+      </nav>
 
     </div>
-  </header><!-- End Header -->
+  </header>
 
-  <!-- ======= Hero Section ======= -->
+  <!-- ==================== -->
+  <!-- ======= HERO ======= -->
+  <!-- ==================== -->
   <section id="hero" class="d-flex align-items-center">
     <div class="container">
       <div class="row">
         <div class="col-lg-6 d-flex flex-column justify-content-center pt-4 pt-lg-0 order-2 order-lg-1" data-aos="fade-up" data-aos-delay="200">
           <h1>Wizard's First Rule</h1>
           <h2><br>
-            <ul>
+            <ul style="list-style-type: none;">
               <li>Dayan Massonnet</li>
               <li>Paul Keller</li>
               <li>Eloi Eynard</li>
@@ -91,7 +92,9 @@
 
   <main id="main">
 
-    <!-- ======= Dataset Section ======= -->
+    <!-- ====================== -->
+    <!-- ======= VIOLIN ======= -->
+    <!-- ====================== -->
     <section id="dataset" class="about">
       <div class="container" data-aos="fade-up">
         <div class="section-title">
@@ -100,9 +103,8 @@
 
         <div class="row content">
           <div class="col-lg-6">
-            <img src="assets/img/violin-plot-example.png" class="static graph">
-          </div>
           <div id="my_dataviz"></div>
+          </div>
           <select id="widthDropdown" onchange="handleSelection()">
             <option value="Global_Sales">Global Sales</option>
             <option value="NA_Sales">NA Sales</option>
@@ -130,41 +132,26 @@
         </div>
 
       </div>
-    </section><!-- End Dataset Section -->
+    </section>
 
-    <!-- ======= Why Us Section ======= -->
+    <!-- ==================== -->
+    <!-- ======= RACE ======= -->
+    <!-- ==================== -->
     <section id="graph2" class="why-us section-bg">
       <div class="container-fluid" data-aos="fade-up">
         <div class="container" data-aos="fade-up">
           <div class="section-title">
-            <h2>Graph2</h2>
+            <h2>Race Barchart</h2>
+            <iframe src="racechart.html" style="width: 100%; height: 500px;"></iframe>
           </div>
-  
-          <div class="row content">
-            <div class="col-lg-6">
-              <p>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore
-                magna aliqua.
-              </p>
-              <ul>
-                <li><i class="ri-check-double-line"></i> Ullamco laboris nisi ut aliquip ex ea commodo consequat</li>
-                <li><i class="ri-check-double-line"></i> Duis aute irure dolor in reprehenderit in voluptate velit</li>
-                <li><i class="ri-check-double-line"></i> Ullamco laboris nisi ut aliquip ex ea commodo consequat</li>
-              </ul>
-            </div>
-            <div class="col-lg-6 pt-4 pt-lg-0">
-              <p>
-                <img src="assets/img/RacingChart.gif" class="img-fluid animated" alt="">
-              </p>
-            </div>
-          </div>
-  
         </div>
 
       </div>
-    </section><!-- End Why Us Section -->
+    </section>
 
-    <!-- ======= Skills Section ======= -->
+    <!-- ==================== -->
+    <!-- ======= MAPS ======= -->
+    <!-- ==================== -->
     <section id="graph3" class="services">
       <div class="container" data-aos="fade-up">
 
@@ -179,31 +166,27 @@
         
 
       </div>
-    </section><!-- End Skills Section -->
+    </section>
 
-    <!-- ======= Services Section ======= -->
+    <!-- ====================== -->
+    <!-- ======= SANKEY ======= -->
+    <!-- ====================== -->
     <section id="graph4" class="services section-bg">
       <div class="container" data-aos="fade-up">
       
         <div class="section-title">
-          <h2>Graph 4</h2>
-          <p><a href="https://en.wikipedia.org/wiki/Sankey_diagram">Sankey diagram</a> are a type of flow diagram in which the width of the arrows is proportional to the flow rate of the depicted extensive property.<br>
-            Sankey diagrams can also visualize the energy accounts, material flow accounts on a regional or national level, and cost breakdowns. The diagrams are often used in the visualization of material flow analysis.<br>
-            Sankey diagrams emphasize the major transfers or flows within a system. They help locate the most important contributions to a flow. They often show conserved quantities within defined system boundaries.</p>
+          <h2>Sankey Diagram</h2>
+          <iframe src="sankey.html" style="width: 100%; height: 1000px;"></iframe>
         </div>
-
-        <div class="section-title">
-          <img src="assets/img/sankeymatic.png" class="sankey_mokup" alt="">
-          <p>Here is a vizualisation insight for final outpus, here all flow are equally distributed, which is not the actual case of our dataset</p>
-        </div>
-
-
       </div>
-    </section><!-- End Services Section -->
+    </section>
 
-  </main><!-- End #main -->
+  <!-- End #main -->
+  </main>
 
-  <!-- ======= Footer ======= -->
+  <!-- ====================== -->
+  <!-- ======= FOOTER ======= -->
+  <!-- ====================== -->
   <footer id="footer">
     <div class="footer-top">
       <div class="container">
@@ -240,7 +223,7 @@
         </div>
       </div>
     </div>
-  </footer><!-- End Footer -->
+  </footer>
 
   <div id="preloader"></div>
   <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
