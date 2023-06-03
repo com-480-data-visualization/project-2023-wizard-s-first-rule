@@ -13,7 +13,7 @@ window.addEventListener('load', handleSelection);
 
 /**
  * Display a violin graph
- * 
+ *
  * @param {string} widthCat - The category for the width of the violin (e.g. Global_Sales)
  * @param {string} xCat - The category for the x axis (e.g. Platform)
  * @return {void}
@@ -43,30 +43,28 @@ function displayViolinGraph(widthCat, xCat) {
     .attr(
       'transform',
       `translate(${margin.left},${margin.top})`,
-    )
+    );
 
   d3.csv('/datasets/vgsales.csv', (data) => {
-
     const minYear = d3.min(data, (d) => d.Year);
     const maxYear = d3.max(data.filter((d) => !isNaN(d.Year)), (d) => d.Year);
     const nbrBins = maxYear - minYear;
-    console.log("minYear: ", minYear, "maxYear: ", maxYear, "nbrBins: ", nbrBins)
 
     // If x is Publisher, only show the top 10 publishers in terms of total sales
-    if (xCat === "Publisher"){
-      var publisherSales = {}
+    if (xCat === 'Publisher') {
+      const publisherSales = {};
       for (var i = 0; i < data.length; i++) {
-        var publisher = data[i].Publisher
-        var sales = parseFloat(data[i][widthCat])
-        if (publisherSales[publisher] == undefined){
-          publisherSales[publisher] = sales
+        const publisher = data[i].Publisher;
+        const sales = parseFloat(data[i][widthCat]);
+        if (publisherSales[publisher] == undefined) {
+          publisherSales[publisher] = sales;
         } else {
-          publisherSales[publisher] += sales
+          publisherSales[publisher] += sales;
         }
       }
-      var sortedPublisherSales = Object.keys(publisherSales).sort(function(a,b){return publisherSales[b]-publisherSales[a]})
-      var top10Publishers = sortedPublisherSales.slice(0,10)
-      data = data.filter(function(d){return top10Publishers.includes(d.Publisher)})
+      const sortedPublisherSales = Object.keys(publisherSales).sort((a, b) => publisherSales[b] - publisherSales[a]);
+      const top10Publishers = sortedPublisherSales.slice(0, 10);
+      data = data.filter((d) => top10Publishers.includes(d.Publisher));
     }
 
     // Build and Show the Y scale
@@ -87,7 +85,6 @@ function displayViolinGraph(widthCat, xCat) {
       .selectAll('text')
       .attr('transform', 'translate(-10,0)rotate(-45)')
       .style('text-anchor', 'end');
-
 
     const histogram = d3.histogram()
       .domain(y.domain())
@@ -133,7 +130,7 @@ function displayViolinGraph(widthCat, xCat) {
       .range([0, x.bandwidth()])
       .domain([-maxNum, maxNum]);
 
-    // Use color palette 
+    // Use color palette
     const colorScale = d3.scaleOrdinal()
       .domain(categories)
       .range(d3.range(sumstat.length).map((i) => d3.interpolateRainbow(i / sumstat.length)));
@@ -149,9 +146,7 @@ function displayViolinGraph(widthCat, xCat) {
       .append('g')
       .attr('transform', (d) => (`translate(${x(d.key)} ,0)`)) // Translation on the right to be at the group position
       .append('path')
-      .datum((d) => {
-        return (d.value);
-      }) // So now we are working bin per bin
+      .datum((d) => (d.value)) // So now we are working bin per bin
       .style('stroke', 'none')
       .style('fill', (d, i) => colorScale(i))
       // Display the width value on mouseover
@@ -166,7 +161,7 @@ function displayViolinGraph(widthCat, xCat) {
         const totalSales = getSum(yearData);
         const textMargin = 10;
         const message = `${year}: ${totalSales.toFixed(2)} millions`;
-    
+
         svg.append('text')
           .attr('class', 'width-label')
           .attr('x', width - textMargin)
@@ -176,7 +171,7 @@ function displayViolinGraph(widthCat, xCat) {
           .style('font-size', '12px')
           .style('font-weight', 'bold');
       })
-      .on('mouseout', function () {
+      .on('mouseout', () => {
         // Remove the width label on mouseout
         svg.select('.width-label').remove();
       })
