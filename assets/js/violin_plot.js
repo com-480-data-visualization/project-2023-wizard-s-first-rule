@@ -26,7 +26,7 @@ function displayViolinGraph(widthCat, xCat) {
 
   // set the dimensions and margins of the graph
   const margin = {
-    top: 10, right: 30, bottom: 30, left: 40,
+    top: 10, right: 30, bottom: 120, left: 40,
   };
   const width = totalWidth - margin.left - margin.right;
   const height = totalHeight - margin.top - margin.bottom;
@@ -168,7 +168,7 @@ function displayViolinGraph(widthCat, xCat) {
           .attr('y', textMargin)
           .text(message)
           .attr('text-anchor', 'end')
-          .style('font-size', '12px')
+          .style('font-size', '14px')
           .style('font-weight', 'bold');
       })
       .on('mouseout', () => {
@@ -180,6 +180,10 @@ function displayViolinGraph(widthCat, xCat) {
         .x1((d) => (xNum(getSum(d))))
         .y((d) => (y(d.x0)))
         .curve(d3.curveCatmullRom), // This makes the line smoother to give the violin appearance
-      );
+      )
+      .attr('opacity', 0) // Set initial opacity to 0
+      .transition() // Apply transition to animate the change
+      .duration(1000) // Set the duration of the transition in milliseconds
+      .attr('opacity', 1); // Transition the opacity to 1
   });
 }
