@@ -12,7 +12,9 @@
   <!-- Favicons -->
   <link href="assets/img/magicon.png" rel="icon">
   <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Jost:300,300i,400,400i,500,500i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Jost:300,300i,400,400i,500,500i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i"
+    rel="stylesheet">
 
   <!-- Vendor CSS Files -->
   <link href="assets/vendor/aos/aos.css" rel="stylesheet">
@@ -70,16 +72,19 @@
   <section id="hero" class="d-flex align-items-center">
     <div class="container">
       <div class="row">
-        <div class="col-lg-6 d-flex flex-column justify-content-center pt-4 pt-lg-0 order-2 order-lg-1" data-aos="fade-up" data-aos-delay="200">
+        <div class="col-lg-6 d-flex flex-column justify-content-center pt-4 pt-lg-0 order-2 order-lg-1"
+          data-aos="fade-up" data-aos-delay="200">
           <h1>Wizard's First Rule</h1>
           <h2><br>
             <ul style="list-style-type: none;">
               <li>Dayan Massonnet</li>
               <li>Paul Keller</li>
               <li>Eloi Eynard</li>
-            </ul> </h2>
+            </ul>
+          </h2>
           <div class="d-flex justify-content-center justify-content-lg-start">
-            <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" target="_blank" class="btn-watch-video"><i class="bi bi-play-circle"></i><span>Watch Our Video</span></a>
+            <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" target="_blank" class="btn-watch-video"><i
+                class="bi bi-play-circle"></i><span>Watch Our Video</span></a>
           </div>
         </div>
         <div class="col-lg-6 order-1 order-lg-2 hero-img" data-aos="zoom-in" data-aos-delay="200">
@@ -99,6 +104,38 @@
       <div class="container" data-aos="fade-up">
         <div class="section-title">
           <h2>The Dataset</h2>
+        </div>
+        <div>
+          <p>
+            Welcome to our website dedicated to exploring the evolution of <b>video games</b> and its dynamic landscape
+            over
+            time and across different regions.
+            Through a collection of informative graphs, we offer a unique glimpse into the ever-changing world of gaming
+            and the shifting interests within this captivating industry.
+            On this platform, we provide a comprehensive overview of the <b>progression</b> of video games, charting
+            their
+            development from early arcade classics to the intricate and immersive experiences of today. Our graphs
+            highlight the advancements in game mechanics, graphics, and genres, revealing the transformation that has
+            taken place over the years.
+            <br><br>
+            Additionally, we delve into the <b>regional</b> variations in video game interests, uncovering intriguing
+            insights
+            into the diverse gaming cultures around the globe. By analyzing popular <b>genres</b>, gaming preferences,
+            and
+            platform choices across different regions, we aim to shed light on how local factors and technological
+            advancements have shaped gaming trends.
+            <br><br>
+            Whether you are a gaming enthusiast, a curious observer, or a researcher interested in the evolution of
+            video games, our website provides a data-driven exploration of this ever-evolving industry. Join us as we
+            uncover the stories hidden within the realm of video games and gain a deeper understanding of the
+            fascinating journey it has undertaken.
+            <br><br>
+            To have a first glimpse of our data and to get a better understanding of the dataset, we invite you to play
+            with the <b>violin plot</b> below.
+            You can select the category you want to display on the x-axis (platform, genre, publisher) and the displayed
+            value (global sales, NA sales, EU sales, JP sales, other sales) which is shown through the width of the
+            violin plot.
+          </p>
         </div>
 
         <div>
@@ -132,6 +169,64 @@
         <div class="container" data-aos="fade-up">
           <div class="section-title">
             <h2>Race Barchart</h2>
+            <style>
+              .hidden {
+                display: none;
+              }
+            </style>
+            <script>
+              function toggleDescriptions() {
+                var descriptions = document.getElementsByClassName("hidden");
+                var button = document.getElementById("showMore");
+                for (var i = 0; i < descriptions.length; i++) {
+                  if (descriptions[i].style.display === "none") {
+                    descriptions[i].style.display = "block";
+                    button.innerHTML = "Show Less";
+                  } else {
+                    descriptions[i].style.display = "none";
+                    button.innerHTML = "Show More";
+                  }
+                }
+              }
+            </script>
+            <button id="showMore" onclick="toggleDescriptions()">Show More</button>
+            <div class="hidden">
+              <h3><b>Sports:</b></h3>
+              <p>Sports games simulate various real-life sports, allowing players to engage in virtual versions of popular athletic activities. An example of a popular sports game is "FIFA Soccer" by Electronic Arts, known for its realistic soccer gameplay.</p>
+          
+              <h3><b>Platform:</b></h3>
+              <p>Platform games involve navigating through a series of platforms and obstacles to progress through levels. "Super Mario Bros." by Nintendo is an iconic platform game that introduced the world to the adventures of Mario, the famous plumber.</p>
+          
+              <h3><b>Racing:</b></h3>
+              <p>Racing games focus on high-speed competition, typically involving vehicles such as cars, motorcycles, or even futuristic spacecraft. "Gran Turismo" by Polyphony Digital is a renowned racing game series known for its realistic driving experience and extensive car selection.</p>
+          
+              <h3><b>Role-Playing (RPG):</b></h3>
+              <p>RPGs allow players to assume the roles of fictional characters and embark on immersive quests and adventures in vast, fantasy worlds. "The Elder Scrolls V: Skyrim" by Bethesda Game Studios is an acclaimed RPG known for its expansive open-world exploration and rich storytelling.</p>
+          
+              <h3><b>Puzzle:</b></h3>
+              <p>Puzzle games test players' problem-solving skills through challenges that require logic, pattern recognition, or spatial awareness. "Tetris" by Alexey Pajitnov is a classic puzzle game that has remained popular for decades, challenging players to arrange falling blocks into complete lines.</p>
+          
+              <h3><b>Misc:</b></h3>
+              <p>Miscellaneous genre represents games that do not fit into a specific category or have unique gameplay elements. These games often offer a blend of different genres or introduce innovative mechanics. "Minecraft" by Mojang Studios is an example of a highly successful game that defies traditional genre classifications, combining elements of sandbox, survival, and creative gameplay.</p>
+          
+              <h3><b>Shooter:</b></h3>
+              <p>Shooter games emphasize combat and gunplay, often from a first-person or third-person perspective. The "Call of Duty" series by Activision is a popular example of shooter games known for their intense multiplayer action and realistic military settings.</p>
+          
+              <h3><b>Simulation:</b></h3>
+              <p>Simulation games aim to replicate real-life activities or scenarios, allowing players to experience various professions or situations. "The Sims" by Maxis is a widely-known simulation game that lets players create and control virtual people in a simulated world, managing their daily lives and aspirations.</p>
+          
+              <h3><b>Action:</b></h3>
+              <p>Action games feature fast-paced gameplay and focus on physical challenges, reflexes, and hand-eye coordination. "Uncharted" by Naughty Dog is a popular action-adventure game that combines exploration, puzzle-solving, and intense action sequences.</p>
+          
+              <h3><b>Fighting:</b></h3>
+              <p>Fighting games pit players against each other in one-on-one battles, showcasing martial arts or special abilities. "Street Fighter" by Capcom is a legendary fighting game franchise that has entertained players with its diverse roster of characters and strategic combat.</p>
+          
+              <h3><b>Adventure:</b></h3>
+              <p>Adventure games focus on exploration, puzzle-solving, and narrative-driven experiences. "The Legend of Zelda: Breath of the Wild" by Nintendo is an acclaimed adventure game that immerses players in a vast, open-world filled with secrets, quests, and memorable characters.</p>
+          
+              <h3><b>Strategy:</b></h3>
+              <p>Strategy games challenge players to plan and execute complex strategies to achieve victory. "Civilization VI" by Firaxis Games is a renowned strategy game where players guide the development of a civilization throughout history, balancing diplomacy, warfare, and cultural growth.</p>
+            </div>
             <iframe src="racechart.html" style="width: 100%; height: 500px;"></iframe>
           </div>
         </div>
@@ -147,13 +242,15 @@
 
         <div class="section-title">
           <h2>Graph 3</h2>
-          <p>Magnam dolores commodi suscipit. Necessitatibus eius consequatur ex aliquid fuga eum quidem. Sit sint consectetur velit. Quisquam quos quisquam cupiditate. Et nemo qui impedit suscipit alias ea. Quia fugiat sit in iste officiis commodi quidem hic quas.</p>
+          <p>Magnam dolores commodi suscipit. Necessitatibus eius consequatur ex aliquid fuga eum quidem. Sit sint
+            consectetur velit. Quisquam quos quisquam cupiditate. Et nemo qui impedit suscipit alias ea. Quia fugiat sit
+            in iste officiis commodi quidem hic quas.</p>
         </div>
         <div class="section-title">
           <img src="assets/img/graph_map.png" class="graph_map" alt="">
           <p>more text ?</p>
         </div>
-        
+
 
       </div>
     </section>
@@ -163,7 +260,7 @@
     <!-- ====================== -->
     <section id="graph4" class="services section-bg">
       <div class="container" data-aos="fade-up">
-      
+
         <div class="section-title">
           <h2>Sankey Diagram</h2>
           <iframe src="sankey.html" style="width: 100%; height: 1000px;"></iframe>
@@ -171,7 +268,7 @@
       </div>
     </section>
 
-  <!-- End #main -->
+    <!-- End #main -->
   </main>
 
   <!-- ====================== -->
@@ -206,7 +303,8 @@
             <h4>GitHub Repo :</h4>
             <p>Find out about the implementation here !</p>
             <div class="social-links mt-3">
-              <a href="https://github.com/com-480-data-visualization/project-2023-wizard-s-first-rule" target="_blank" class="GitHub"><i class="bx bxl-github"></i></a>
+              <a href="https://github.com/com-480-data-visualization/project-2023-wizard-s-first-rule" target="_blank"
+                class="GitHub"><i class="bx bxl-github"></i></a>
             </div>
           </div>
 
@@ -216,7 +314,8 @@
   </footer>
 
   <div id="preloader"></div>
-  <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+  <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i
+      class="bi bi-arrow-up-short"></i></a>
 
   <!-- Vendor JS Files -->
   <script src="assets/vendor/aos/aos.js"></script>
