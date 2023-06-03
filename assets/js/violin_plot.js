@@ -45,7 +45,7 @@ function displayViolinGraph(widthCat, xCat) {
       `translate(${margin.left},${margin.top})`,
     );
 
-  d3.csv('/datasets/vgsales.csv', (data) => {
+  d3.csv('../../datasets/vgsales.csv', (data) => {
     const minYear = d3.min(data, (d) => d.Year);
     const maxYear = d3.max(data.filter((d) => !isNaN(d.Year)), (d) => d.Year);
     const nbrBins = maxYear - minYear;
