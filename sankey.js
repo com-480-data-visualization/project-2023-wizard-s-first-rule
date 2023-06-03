@@ -433,7 +433,10 @@ function createCheckbox(){
                  .attr("id", "padding-toggle")
                  .on("change", (event) => {
                      if(event.target.checked){
-                        link_width = d => Math.max(1, d.width);
+                        link_width = d => {
+                            if (d.width>0.0) return Math.max(1, d.width);
+                            return d.width;
+                        }
                      } else link_width = d => d.width;
                      drawSankey();
                  });
@@ -496,8 +499,8 @@ function addColor(data) {
 
     const min_factor = 0.8;
     const max_factor = 1.2;
-    const interpolation_region = d3.interpolateRainbow;
-    const interpolation_genre = d3.interpolateRainbow;
+    const interpolation_region   = d3.interpolateRainbow;
+    const interpolation_genre    = d3.interpolateRainbow;
     const interpolation_platform = d3.interpolateRainbow;
     /*
         interpolateReds
@@ -574,7 +577,7 @@ async function loadSankeyData() {
 
 function get_sankeyData(raw_data){
     
-    const parsed_data = raw_data.filter(row => row['Genre']!='' || row['Name']!=''); // lose two line... OK
+    const parsed_data = raw_data.filter(row => row['Genre']!='' && row['Name']!='' && +row['Year_of_Release']<=2016); // lose two line... OK
 
     const platforms = [... new Set(parsed_data.map(row => row['Platform']))];
     const genres = [... new Set(parsed_data.map(row => row['Genre']))];
@@ -685,13 +688,9 @@ function createBarchart(d) {
     const chart_height = chart_box.height - 2*margin;
     container.style("padding-top", margin + "px")
 
-
-    // container.append("p")
-    //          .text(get_name(d) +": " + total.toFixed(2));
-
     // Create an SVG container for the diagram
     chart = container   .append("svg")
-                        .attr("width",  "90%")
+                        .attr("width",  "100%")
                         .attr("height", chart_height);
 
                 
@@ -814,7 +813,6 @@ function add_node_value(values){
 
     const container = d3.select("#node-value-container");
     container.style("display", "flex")
-    // .style("justify-content", "center")
     .style("align-items", "center")
     .style("flex-direction", "column");
 
