@@ -26,7 +26,7 @@ function displayViolinGraph(widthCat, xCat) {
 
   // set the dimensions and margins of the graph
   const margin = {
-    top: 10, right: 30, bottom: 120, left: 40,
+    top: 10, right: 30, bottom: 30, left: 40,
   };
   const width = totalWidth - margin.left - margin.right;
   const height = totalHeight - margin.top - margin.bottom;
