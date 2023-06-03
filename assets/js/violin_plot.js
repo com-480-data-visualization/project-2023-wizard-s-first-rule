@@ -21,12 +21,15 @@ window.addEventListener('load', handleSelection);
 function displayViolinGraph(widthCat, xCat) {
   // Base code taken from https://d3-graph-gallery.com/graph/violin_basicHist.html
 
+  const totalWidth = 1060;
+  const totalHeight = 400;
+
   // set the dimensions and margins of the graph
   const margin = {
     top: 10, right: 30, bottom: 120, left: 40,
   };
-  const width = 1060 - margin.left - margin.right;
-  const height = 400 - margin.top - margin.bottom;
+  const width = totalWidth - margin.left - margin.right;
+  const height = totalHeight - margin.top - margin.bottom;
 
   d3.select('#violinPlot').remove();
 
@@ -42,10 +45,12 @@ function displayViolinGraph(widthCat, xCat) {
       `translate(${margin.left},${margin.top})`,
     )
 
-  // d3.select('#violinPlot').remove();
-
-  // Read the data and compute summary statistics for each specie
   d3.csv('/datasets/vgsales.csv', (data) => {
+
+    const minYear = d3.min(data, (d) => d.Year);
+    const maxYear = d3.max(data.filter((d) => !isNaN(d.Year)), (d) => d.Year);
+    const nbrBins = maxYear - minYear;
+    console.log("minYear: ", minYear, "maxYear: ", maxYear, "nbrBins: ", nbrBins)
 
     // If x is Publisher, only show the top 10 publishers in terms of total sales
     if (xCat === "Publisher"){
@@ -66,16 +71,16 @@ function displayViolinGraph(widthCat, xCat) {
 
     // Build and Show the Y scale
     const y = d3.scaleLinear()
-      .domain([1960, 2020]) // Note that here the Y scale is set manually
+      .domain([minYear, maxYear])
       .range([height, 0]);
     svg.append('g').call(d3.axisLeft(y));
 
     const categories = data.map((d) => d[xCat]);
-    // Build and Show the X scale. It is a band scale like for a boxplot: each group has an dedicated RANGE on the axis. This range has a length of x.bandwidth
+    // Build and Show the X scale
     const x = d3.scaleBand()
       .range([0, width])
       .domain(categories)
-      .padding(0.05); // This is important: it is the space between 2 groups. 0 means no padding. 1 is the maximum.
+      .padding(0.05); // space between 2 groups. 0 means no padding. 1 is the maximum.
     svg.append('g')
       .attr('transform', `translate(0,${height})`)
       .call(d3.axisBottom(x)) // rotate the text labels
@@ -84,10 +89,9 @@ function displayViolinGraph(widthCat, xCat) {
       .style('text-anchor', 'end');
 
 
-    // Features of the histogram
     const histogram = d3.histogram()
       .domain(y.domain())
-      .thresholds(y.ticks(20)) // Important: how many bins approx are going to be made? It is the 'resolution' of the violin plot
+      .thresholds(y.ticks(nbrBins))
       .value((d) => d.year);
 
     // Compute the binning for each group of the dataset
@@ -134,7 +138,10 @@ function displayViolinGraph(widthCat, xCat) {
       .domain(categories)
       .range(d3.range(sumstat.length).map((i) => d3.interpolateRainbow(i / sumstat.length)));
 
-    // Add the shape to this svg!
+    const inverseY = d3.scaleLinear()
+      .domain([height, 0])
+      .range([minYear, maxYear]);
+
     svg
       .selectAll('myViolin')
       .data(sumstat)
@@ -147,11 +154,37 @@ function displayViolinGraph(widthCat, xCat) {
       }) // So now we are working bin per bin
       .style('stroke', 'none')
       .style('fill', (d, i) => colorScale(i))
+      // Display the width value on mouseover
+      .on('mousemove', function (d) {
+        // Remove the old displayed value
+        svg.select('.width-label').remove();
+
+        const [, mouseY] = d3.mouse(this);
+        const year = Math.round(inverseY(mouseY));
+        const yearIndex = year - minYear;
+        const yearData = d[yearIndex];
+        const totalSales = getSum(yearData);
+        const textMargin = 10;
+        const message = `${year}: ${totalSales.toFixed(2)} millions`;
+    
+        svg.append('text')
+          .attr('class', 'width-label')
+          .attr('x', width - textMargin)
+          .attr('y', textMargin)
+          .text(message)
+          .attr('text-anchor', 'end')
+          .style('font-size', '12px')
+          .style('font-weight', 'bold');
+      })
+      .on('mouseout', function () {
+        // Remove the width label on mouseout
+        svg.select('.width-label').remove();
+      })
       .attr('d', d3.area()
         .x0((d) => (xNum(-getSum(d))))
         .x1((d) => (xNum(getSum(d))))
         .y((d) => (y(d.x0)))
-        .curve(d3.curveCatmullRom), // This makes the line smoother to give the violin appearance. Try d3.curveStep to see the difference
+        .curve(d3.curveCatmullRom), // This makes the line smoother to give the violin appearance
       );
   });
 }
