@@ -51,6 +51,8 @@ We are new to exploring this dataset. Prior analyses on this dataset have involv
 
 **10% of the final grade**
 
+Our website is deployed on GitHub pages and can be accessed [here](https://com-480-data-visualization.github.io/project-2023-wizard-s-first-rule/).\
+The pdf presenting the main ideas can be found [here](./milestone2.pdf) 
 
 ## Milestone 3 (4th June, 5pm)
 
