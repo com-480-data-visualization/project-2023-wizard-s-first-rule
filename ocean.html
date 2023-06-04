@@ -149,6 +149,8 @@ var series = svg.selectAll(".series")
   })
   .style("fill", d => "url(#"+d.key+")");
 
+console.log(series)
+
 
 var tooltip = d3.select("body")
   .append("div")
@@ -163,16 +165,22 @@ series.selectAll("rect")
   .attr("y", d => y(d[1]))
   .attr("height", d => y(d[0]) - y(d[1]))
   .attr("width", x.bandwidth())
+  .attr("stroke", "grey")
+  .attr("stroke-width", 0.5)
   .on("mouseover", function(d) {
-    var genre = d.Genre;
+    var to_display = d.Genre + " " + ((d[1] - d[0])*100).toFixed(1) + "%";
     tooltip.transition()
       .duration(200)
       .style("opacity", 0.9);
-    tooltip.html(genre)
+    tooltip.html(to_display)
       .style("left", (d3.event.pageX) + "px")
       .style("top", (d3.event.pageY - 28) + "px");
   })
-  .on("mousemove", function(d) { // Update tooltip position on mousemove
+  .on("mousemove", function(d) { // Update tooltip position and text on mousemove
+    var to_display = d.Genre + " " + ((d[1] - d[0])*100).toFixed(1) + "%";
+    tooltip.html(to_display)
+      .style("left", (d3.event.pageX) + "px")
+      .style("top", (d3.event.pageY - 28) + "px");
     tooltip.style("left", (d3.event.pageX) + "px")
       .style("top", (d3.event.pageY - 28) + "px");
   })
