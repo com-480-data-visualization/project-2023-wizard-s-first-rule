@@ -60,6 +60,19 @@ The pdf presenting the main ideas can be found [here](./milestone2.pdf)
 Our website is deployed on GitHub pages and can be accessed [here](https://com-480-data-visualization.github.io/project-2023-wizard-s-first-rule/).\
 The process book can be found [here](./processbook.pdf)
 
+This the general structure of our repo:
+```
+.
+├── README.md <-- current file
+├── index.html <-- file to display our website
+├── vg_sales.ipynb <-- notebook to explore the dataset
+├── datasets/ <-- Our datasets
+└── assets/ <-- contains scripts, style, images for the website
+    ├── css/ <-- stylesheet
+    ├── img/ <-- images for the website
+    └── js/ <-- scripts for visualisation
+```
+
 
 ## Late policy
 
