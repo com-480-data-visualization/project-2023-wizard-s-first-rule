@@ -160,7 +160,7 @@ function displayViolinGraph(widthCat, xCat) {
         const yearData = d[yearIndex];
         const totalSales = getSum(yearData);
         const textMargin = 10;
-        const message = `${year}: ${totalSales.toFixed(2)} millions`;
+        const message = `${year}: ${totalSales.toFixed(2)} millions copies sold`;
 
         svg.append('text')
           .attr('class', 'width-label')
