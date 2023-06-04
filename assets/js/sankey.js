@@ -1,15 +1,3 @@
-/*
-
----
-RK
----
-- japan is putting RolePlay in 4th position and barely play Shooter... ?
-- La Wii c'est beaucoup le sport et la music
-et le sport c'est la wii aussi
-- la DS : la simulation
-- Shooters c'est xb360
-- par la couleur on peut voir un gros gap entre PS et GBA (no orange)
-*/
 
 (function () { // small trick to have 'global' variable only global for this script
   // Set the dimensions and margins of the diagram
@@ -39,26 +27,7 @@ et le sport c'est la wii aussi
   const duration = 1500;
   const hide_timeout = 1500;
 
-  // loadAndCreateSankey_json(); // nodes/links pre-computed and loaded from json file
   loadAndCreateSankey();
-  // ======================================================================
-  // ================================================================= LOAD
-  // ======================================================================
-  // async function loadAndCreateSankey_json() {
-  //     try {
-  //         const [read_data, read_urls] = await Promise.all([
-  //             d3.json("./datasets/sankey.json"),
-  //             d3.json("./datasets/sankey_links.json"),
-  //         ]);
-  //         data = read_data;
-  //         urls = read_urls;
-  //         console.log(data);
-  //         createDropdowns();
-  //         createSankeyDiagram();
-  //     } catch (error) {
-  //         console.error("Error loading or processing data:", error);
-  //     }
-  // }
 
   async function loadAndCreateSankey() {
     try {
