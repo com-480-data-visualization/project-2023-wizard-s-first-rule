@@ -35,7 +35,6 @@ et le sport c'est la wii aussi
     const shadow_opacity = 0.05;
     const node_width = 50;   // default is 24
     let node_padding = 5; // default is 8
-    const reading_padding = 15;
     const iterations = 200;  // default is 6
 
     const duration = 1500;
@@ -188,10 +187,16 @@ et le sport c'est la wii aussi
                     .join("rect")
                     .attr("class", "hover")
                     .on("mouseover", (event, d) => {
+                        if (d.category === categories[2]) {
+                            showHoverImage(event, d);
+                        }
                         shadows_links(d);
                         createBarchart(d);
                     })
-                    .on("mouseout" , () => {
+                    .on("mouseout" , (event, d) => {
+                        if (d.category === categories[2]) {
+                            hideHoverImage();
+                        }
                         shadows_reset();
                         removeBarchart();
                     });
@@ -256,33 +261,23 @@ et le sport c'est la wii aussi
         container.style("grid-row","1/2");
         const image_box = container.node().getBoundingClientRect();
 
+        // prevent hideTimeout to erase new image
+        clearTimeout(container.property("hideTimeout"));
 
-        // hide others image  
-        container.style("display", "none");
+        const svgBB =  svg.node().getBBox(); // BoundingBox
 
-        // prevent showTimeout to erase new image
-        clearTimeout(container.property("showTimeout"));
-        const showTimeout = setTimeout(() => {
+        container
+            .style("visibility", "visible")
+            .attr("width","100%")
+            .attr("height","100%")
+            .html(`<a href="${wikiUrl}" target="_blank"><img src='${imageUrl}'
+                    alt="${d.name}" title="${d.name}" width="${image_box.width}" /></a>`);
 
-            // prevent hideTimeout to erase new image
-            clearTimeout(container.property("hideTimeout"));
-
-            const svgBB =  svg.node().getBBox(); // BoundingBox
-
-            container
-                .style("display", "block")
-                .attr("width","100%")
-                .attr("height","100%")
-                .html(`<a href="${wikiUrl}" target="_blank"><img src='${imageUrl}'
-                        alt="${d.name}" title="${d.name}" width="${image_box.width}" /></a>`);
-
-            container
-                .on("mouseover", () => {
-                    clearTimeout(container.property("hideTimeout"));
-                })
-                .on("mouseout", hideHoverImage);
-        }, 1);
-        container.property("showTimeout", showTimeout);
+        container
+            .on("mouseover", () => {
+                clearTimeout(container.property("hideTimeout"));
+            })
+            .on("mouseout", hideHoverImage);
     }
 
     // Hide Hover Image
@@ -290,7 +285,7 @@ et le sport c'est la wii aussi
         const container = d3.select("#hover-image-container");
 
         const hideTimeout = setTimeout(() => {
-            container.style("display", "none");
+            container.style("visibility", "hidden");
         }, hide_timeout);
 
         container.property("hideTimeout", hideTimeout);
