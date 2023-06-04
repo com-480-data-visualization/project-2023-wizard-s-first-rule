@@ -67,6 +67,7 @@ This the general structure of our repo:
 ├── README.md <-- current file
 ├── index.html <-- file to display our website
 ├── vg_sales.ipynb <-- notebook to explore the dataset
+├── format_data_for_sankey.ipynb <-- notebook to format the data for the sankey diagram
 ├── datasets/ <-- Our datasets
 └── assets/ <-- contains scripts, style, images for the website
     ├── css/ <-- stylesheet
