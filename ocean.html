@@ -6,7 +6,7 @@
 <script src="https://d3js.org/d3-array.v2.min.js"></script>
 
 <!-- Create a div where the graph will take place -->
-<div id="my_dataviz"></div>
+<div id="ocean_dataviz"></div>
 
 <style>
   .tooltip {
@@ -66,7 +66,7 @@ var width = 1200 - margin.left - margin.right;
 var height = 430 - margin.top - margin.bottom;
 
 // Create the SVG element
-var svg = d3.select("body")
+var svg = d3.select("#ocean_dataviz")
   .append("svg")
   .attr("width", width + margin.left + margin.right)
   .attr("height", height + margin.top + margin.bottom)
