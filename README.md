@@ -58,7 +58,8 @@ The pdf presenting the main ideas can be found [here](./milestone2.pdf)
 
 **80% of the final grade**
 Our website is deployed on GitHub pages and can be accessed [here](https://com-480-data-visualization.github.io/project-2023-wizard-s-first-rule/).\
-The process book can be found [here](./processbook.pdf)
+The process book can be found [here](./ProcessBook.pdf)
+The video can be found [here](https://www.youtube.com/watch?v=KQPSHYlH8P0)
 
 This the general structure of our repo:
 ```
@@ -66,6 +67,7 @@ This the general structure of our repo:
 ├── README.md <-- current file
 ├── index.html <-- file to display our website
 ├── vg_sales.ipynb <-- notebook to explore the dataset
+├── format_data_for_sankey.ipynb <-- notebook to format the data for the sankey diagram
 ├── datasets/ <-- Our datasets
 └── assets/ <-- contains scripts, style, images for the website
     ├── css/ <-- stylesheet
