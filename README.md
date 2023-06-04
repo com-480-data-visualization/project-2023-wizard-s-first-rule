@@ -6,7 +6,7 @@
 | Eynard Eloi | 296426 |
 | Massonnet Dayan | 300882 |
 
-[Milestone 1](#milestone-1) • [Milestone 2](#milestone-2) • [Milestone 3](#milestone-3)
+[Milestone 1](#milestone-1-7th-april-5pm) • [Milestone 2](#milestone-2-7th-may-5pm) • [Milestone 3](#milestone-3-4th-june-5pm)
 
 ## Milestone 1 (7th April, 5pm)
 
