@@ -57,6 +57,8 @@ The pdf presenting the main ideas can be found [here](./milestone2.pdf)
 ## Milestone 3 (4th June, 5pm)
 
 **80% of the final grade**
+Our website is deployed on GitHub pages and can be accessed [here](https://com-480-data-visualization.github.io/project-2023-wizard-s-first-rule/).\
+The process book can be found [here](./processbook.pdf)
 
 
 ## Late policy
